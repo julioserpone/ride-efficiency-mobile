@@ -1,18 +1,43 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import '@/theme/global-styles';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AuthProvider } from '@/lib/auth-store';
+import { AppThemeProvider, useAppTheme } from '@/theme/theme-provider';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+export const unstable_settings = {
+  anchor: '(tabs)',
+};
 
-SplashScreen.preventAutoHideAsync();
+/** Keeps the status bar legible on both the light and the dark canvas. */
+function StatusBarForTheme() {
+  const { mode } = useAppTheme();
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  return <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />;
+}
+
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppThemeProvider>
+        <AuthProvider>
+          {/* Screens paint their own aurora background, so the stacks are transparent. */}
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: 'transparent' },
+              animation: 'slide_from_right',
+            }}
+          >
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="login" options={{ animation: 'fade' }} />
+            <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="receipt/[id]" />
+            <Stack.Screen name="shift/new" options={{ presentation: 'modal' }} />
+          </Stack>
+          <StatusBarForTheme />
+        </AuthProvider>
+      </AppThemeProvider>
+    </GestureHandlerRootView>
   );
 }
