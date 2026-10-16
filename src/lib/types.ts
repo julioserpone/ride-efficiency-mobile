@@ -85,6 +85,8 @@ export type Vehicle = {
   country: Country;
 };
 
+export type RideTripVerdict = 'accept' | 'marginal' | 'reject';
+
 export type RideTrip = {
   id: number;
   vehicle_id: number;
@@ -103,7 +105,7 @@ export type RideTrip = {
   other_costs: Numeric;
   net_profit: Numeric;
   break_even_fare: Numeric;
-  verdict: 'accept' | 'marginal' | 'reject' | string;
+  verdict: RideTripVerdict;
   created_at: string;
   vehicle?: Vehicle;
 };

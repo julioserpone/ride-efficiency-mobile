@@ -1,9 +1,8 @@
-import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
-import { ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { AppText } from '@/components/ui/text';
 import { Spacing } from '@/theme/tokens';
+import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export type ScreenProps = {
   title: string;
@@ -46,7 +45,7 @@ export function Screen({
   if (!scroll) {
     return (
       <AuroraBackground>
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
           <View style={[styles.content, contentStyle]}>
             {header}
             {children}
@@ -58,7 +57,7 @@ export function Screen({
 
   return (
     <AuroraBackground>
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
         <ScrollView
           contentContainerStyle={[styles.content, contentStyle]}
           showsVerticalScrollIndicator={false}

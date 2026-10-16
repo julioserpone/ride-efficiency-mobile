@@ -100,10 +100,15 @@ export default function DashboardScreen() {
         title={t('home.weeks')}
         subtitle={t('home.weekSubtitle')}
         action={
-          <View style={styles.legend}>
-            <View style={[styles.dot, { backgroundColor: colors.primary }]} />
-            <AppText variant="caption" tone="muted">
-              {t('home.profit')}
+          <View style={styles.cardAction}>
+            <View style={styles.legend}>
+              <View style={[styles.dot, { backgroundColor: colors.primary }]} />
+              <AppText variant="caption" tone="muted">
+                {t('home.profit')}
+              </AppText>
+            </View>
+            <AppText variant="label" tone="primary" onPress={() => router.push('/stats')}>
+              {t('home.viewStats')}
             </AppText>
           </View>
         }
@@ -194,4 +199,5 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: Radius.pill },
   trendRow: { flexDirection: 'row', justifyContent: 'space-between' },
   actions: { gap: Spacing.sm },
+  cardAction: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
 });

@@ -75,10 +75,6 @@ export default function ProfileScreen() {
       </GlassSurface>
 
       <GlassSurface style={styles.card}>
-        <ListRow icon="doc.text" title={t('profile.invoiceItem')} subtitle={t('profile.scannedReceipts')} onPress={() => router.push('/receipts')} />
-        <ListRow icon="car.side" title={t('profile.vehicles')} subtitle={t('profile.vehiclesSubtitle')} onPress={() => router.push('/vehicles')} />
-        <ListRow icon="point.topleft.down.curvedto.point.bottomright.up" title={t('profile.rideTrips')} subtitle={t('profile.rideTripsSubtitle')} onPress={() => router.push('/ride-trips')} />
-        <ListRow icon="car" title={t('profile.shiftItem')} subtitle={t('profile.shiftSubtitle')} onPress={() => router.push('/shifts')} />
         <ListRow icon="chart.bar.xaxis" title={t('profile.statsItem')} subtitle={t('profile.statisticsSubtitle')} onPress={() => router.push('/stats')} />
       </GlassSurface>
 
