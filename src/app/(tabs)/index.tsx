@@ -52,6 +52,7 @@ export default function DashboardScreen() {
     <Screen
       title={t('home.greeting', { name: user?.name?.split(' ')[0] ?? t('profile.driver') })}
       subtitle={t('home.subtitle')}
+      headerAccessory={<UserAvatar />}
     >
       <View style={styles.heroRow}>
         <StatTile
