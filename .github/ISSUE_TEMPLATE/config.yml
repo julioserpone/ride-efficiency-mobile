@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security or privacy concern
+    url: https://github.com/ride-efficiency/ride-efficiency-mobile/security/advisories/new
+    about: Report a security or privacy concern privately. Do not file secrets in a public issue.
