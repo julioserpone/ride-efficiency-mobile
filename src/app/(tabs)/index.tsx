@@ -1,4 +1,5 @@
 import { Sparkline } from '@/components/charts/sparkline';
+import { UserAvatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { ListRow } from '@/components/ui/list-row';
@@ -11,7 +12,6 @@ import { useAuth } from '@/lib/auth-store';
 import { stats } from '@/lib/endpoints';
 import { formatCurrency, formatDate, formatKm, percentChange, toNumber } from '@/lib/format';
 import { useLanguage } from '@/lib/i18n';
-import { useColors } from '@/theme/theme-provider';
 import { Radius, Spacing } from '@/theme/tokens';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
@@ -25,7 +25,6 @@ import { StyleSheet, View } from 'react-native';
  */
 export default function DashboardScreen() {
   const { token, user } = useAuth();
-  const colors = useColors();
   const { t } = useLanguage();
   const summary = useAsync(() => stats.summary(token!), [token]);
   const weekly = useAsync(() => stats.weekly(token!), [token]);

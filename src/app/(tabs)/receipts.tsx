@@ -1,3 +1,4 @@
+import { UserAvatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { GlassSurface } from '@/components/ui/glass-surface';
