@@ -2,7 +2,12 @@ import { apiRequest } from '@/lib/api';
 import type {
   ApiUser,
   CloseShiftPayload,
+  CreateRideTripPayload,
+  CreateVehiclePayload,
+  Country,
   EfficiencyResponse,
+  EnergyInvoiceReviewPayload,
+  EnergyProduct,
   FuelInvoiceListResponse,
   FuelInvoiceResponse,
   IssueTokenResponse,
@@ -12,6 +17,8 @@ import type {
   StatsSummaryResponse,
   WeeklyStatsResponse,
   MonthlyStatsResponse,
+  RideTrip,
+  Vehicle,
 } from '@/lib/types';
 
 /**
@@ -32,21 +39,50 @@ export const auth = {
     apiRequest<{ message: string }>('/auth/token', { method: 'DELETE', token }),
 };
 
-export const fuelInvoices = {
-  list: (token: string) => apiRequest<FuelInvoiceListResponse>('/fuel-invoices', { token }),
+export const energyInvoices = {
+  list: (token: string) => apiRequest<FuelInvoiceListResponse>('/energy-invoices', { token }),
 
   show: (token: string, id: number) =>
-    apiRequest<FuelInvoiceResponse>(`/fuel-invoices/${id}`, { token }),
+    apiRequest<FuelInvoiceResponse>(`/energy-invoices/${id}`, { token }),
 
   create: (token: string, formData: FormData) =>
-    apiRequest<FuelInvoiceResponse>('/fuel-invoices', {
+    apiRequest<FuelInvoiceResponse>('/energy-invoices', {
       method: 'POST',
       token,
       formData,
     }),
 
+  review: (token: string, id: number, payload: EnergyInvoiceReviewPayload) =>
+    apiRequest<FuelInvoiceResponse>(`/energy-invoices/${id}/review`, {
+      method: 'PATCH',
+      token,
+      body: payload,
+    }),
+
   remove: (token: string, id: number) =>
-    apiRequest<{ message: string }>(`/fuel-invoices/${id}`, { method: 'DELETE', token }),
+    apiRequest<{ message: string }>(`/energy-invoices/${id}`, { method: 'DELETE', token }),
+};
+
+export const countries = {
+  list: (token: string) => apiRequest<{ countries: Country[] }>('/countries', { token }),
+  energyProducts: (token: string, countryCode: string) =>
+    apiRequest<{ country: Pick<Country, 'code' | 'name'>; products: EnergyProduct[] }>(
+      `/countries/${countryCode}/energy-products`,
+      { token },
+    ),
+};
+
+export const vehicles = {
+  list: (token: string) => apiRequest<{ vehicles: { data: Vehicle[]; current_page: number; last_page: number; total: number } }>('/vehicles', { token }),
+  create: (token: string, payload: CreateVehiclePayload) =>
+    apiRequest<{ message: string; vehicle: Vehicle }>('/vehicles', { method: 'POST', token, body: payload }),
+};
+
+export const rideTrips = {
+  list: (token: string) => apiRequest<{ trips: { data: RideTrip[]; current_page: number; last_page: number; total: number } }>('/ride-trips', { token }),
+  show: (token: string, id: number) => apiRequest<{ trip: RideTrip }>(`/ride-trips/${id}`, { token }),
+  create: (token: string, vehicleId: number, payload: CreateRideTripPayload) =>
+    apiRequest<{ message: string; trip: RideTrip }>(`/vehicles/${vehicleId}/trips`, { method: 'POST', token, body: payload }),
 };
 
 export const shifts = {

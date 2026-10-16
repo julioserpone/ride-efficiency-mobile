@@ -1,5 +1,3 @@
-import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
 import { Sparkline } from '@/components/charts/sparkline';
 import { Button } from '@/components/ui/button';
 import { EmptyState, SectionCard } from '@/components/ui/card';
@@ -12,8 +10,11 @@ import { useReceipts } from '@/hooks/use-receipts';
 import { useAuth } from '@/lib/auth-store';
 import { stats } from '@/lib/endpoints';
 import { formatCurrency, formatDate, formatKm, percentChange, toNumber } from '@/lib/format';
-import { Radius, Spacing } from '@/theme/tokens';
+import { useLanguage } from '@/lib/i18n';
 import { useColors } from '@/theme/theme-provider';
+import { Radius, Spacing } from '@/theme/tokens';
+import { router } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 /**
  * Today — the driver's landing screen.
@@ -25,6 +26,7 @@ import { useColors } from '@/theme/theme-provider';
 export default function DashboardScreen() {
   const { token, user } = useAuth();
   const colors = useColors();
+  const { t } = useLanguage();
   const summary = useAsync(() => stats.summary(token!), [token]);
   const weekly = useAsync(() => stats.weekly(token!), [token]);
   const receipts = useReceipts();
@@ -48,14 +50,14 @@ export default function DashboardScreen() {
 
   return (
     <Screen
-      title={`Hi, ${user?.name?.split(' ')[0] ?? 'driver'}`}
-      subtitle="Your fuel and profit at a glance"
+      title={t('home.greeting', { name: user?.name?.split(' ')[0] ?? t('profile.driver') })}
+      subtitle={t('home.subtitle')}
     >
       <View style={styles.heroRow}>
         <StatTile
-          label="This month"
+          label={t('home.month')}
           value={formatCurrency(monthProfit, 'USD', null, { compact: true })}
-          hint={`${totals?.total_shifts ?? 0} shifts logged`}
+          hint={t('home.shiftsLogged', { count: totals?.total_shifts ?? 0 })}
           icon="calendar"
           tone={monthProfit >= 0 ? 'profit' : 'loss'}
           emphasis
@@ -64,16 +66,16 @@ export default function DashboardScreen() {
 
       <View style={styles.grid}>
         <StatTile
-          label="Net profit"
+          label={t('home.netProfit')}
           value={formatCurrency(totals?.total_net_profit)}
-          hint={trend !== null ? `${trend.toFixed(1)}% vs last week` : 'no baseline yet'}
+          hint={trend !== null ? t('home.vsLastWeek', { value: trend.toFixed(1) }) : t('home.noBaseline')}
           icon="chart.line.uptrend.xyaxis"
           tone={toNumber(totals?.total_net_profit) >= 0 ? 'profit' : 'loss'}
         />
         <StatTile
-          label="Fuel cost"
+          label={t('home.energyCost')}
           value={formatCurrency(totals?.total_fuel_cost)}
-          hint={`${fuelShare.toFixed(0)}% of revenue`}
+          hint={t('home.revenueShare', { value: fuelShare.toFixed(0) })}
           icon="fuelpump"
           tone="neutral"
         />
@@ -81,39 +83,39 @@ export default function DashboardScreen() {
 
       <View style={styles.grid}>
         <StatTile
-          label="Distance"
+          label={t('home.distance')}
           value={formatKm(totals?.total_km)}
-          hint={`avg ${formatKm(totals?.avg_daily_km)}`}
+          hint={t('home.average', { value: formatKm(totals?.avg_daily_km) })}
           icon="road.lanes"
         />
         <StatTile
-          label="Trips"
+          label={t('home.trips')}
           value={String(Math.round(toNumber(totals?.total_trips)))}
-          hint="completed"
+          hint={t('home.completed')}
           icon="checkmark.circle"
         />
       </View>
 
       <SectionCard
-        title="Last 8 weeks"
-        subtitle="Net profit per week"
+        title={t('home.weeks')}
+        subtitle={t('home.weekSubtitle')}
         action={
           <View style={styles.legend}>
             <View style={[styles.dot, { backgroundColor: colors.primary }]} />
             <AppText variant="caption" tone="muted">
-              profit
+              {t('home.profit')}
             </AppText>
           </View>
         }
       >
         {weekly.isLoading ? (
           <AppText variant="caption" tone="muted">
-            Loading trends…
+            {t('home.loadingTrends')}
           </AppText>
         ) : weeks.length === 0 ? (
           <EmptyState
-            message="No shifts recorded yet"
-            hint="Log your first shift to start seeing trends."
+            message={t('home.noShifts')}
+            hint={t('home.noShiftsHint')}
           />
         ) : (
           <>
@@ -131,32 +133,29 @@ export default function DashboardScreen() {
       </SectionCard>
 
       <SectionCard
-        title="Recent receipts"
-        subtitle="Fuel invoices you have scanned"
+        title={t('home.recentInvoices')}
+        subtitle={t('home.energyInvoices')}
         action={
           <AppText variant="label" tone="primary" onPress={() => router.push('/receipts')}>
-            See all
+            {t('home.seeAll')}
           </AppText>
         }
         padded={false}
       >
         {receipts.isLoading ? (
           <AppText variant="caption" tone="muted">
-            Loading receipts…
+            {t('home.loadingReceipts')}
           </AppText>
         ) : receipts.invoices.length === 0 ? (
-          <EmptyState
-            message="No fuel receipts yet"
-            hint="Scan your first invoice to track fuel spend."
-          />
+          <EmptyState message={t('home.noInvoices')} hint={t('home.noInvoicesHint')} />
         ) : (
           receipts.invoices.slice(0, 3).map((invoice) => (
             <ListRow
               key={invoice.id}
               icon="doc.text"
-              title={invoice.fuel_type ?? 'Fuel receipt'}
+              title={invoice.fuel_type ?? 'Energy receipt'}
               subtitle={`${formatDate(invoice.invoice_date ?? invoice.created_at)}${
-                invoice.fuel_volume_units ? ` · ${toNumber(invoice.fuel_volume_units)} L` : ''
+                invoice.energy_amount ? ` · ${toNumber(invoice.energy_amount)} ${invoice.energy_unit ?? ''}` : ''
               }`}
               value={formatCurrency(invoice.total_amount_paid)}
               onPress={() => router.push(`/receipt/${invoice.id}`)}
@@ -167,12 +166,12 @@ export default function DashboardScreen() {
 
       <View style={styles.actions}>
         <Button
-          label="Scan a receipt"
+          label={t('home.scan')}
           icon="camera.viewfinder"
           onPress={() => router.push('/receipts')}
         />
         <Button
-          label="Log a shift"
+          label={t('home.logShift')}
           icon="plus"
           variant="secondary"
           onPress={() => router.push('/shift/new')}

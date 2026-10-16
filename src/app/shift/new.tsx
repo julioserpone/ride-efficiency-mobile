@@ -11,6 +11,7 @@ import { ApiError } from '@/lib/api';
 import { shifts } from '@/lib/endpoints';
 import { Radius, Spacing } from '@/theme/tokens';
 import { useColors } from '@/theme/theme-provider';
+import { useLanguage } from '@/lib/i18n';
 
 /** Default platform list — matches the providers the API tracks per shift. */
 const PROVIDERS = ['Uber', 'DiDi', 'Lyft', 'inDrive', 'Cabify'] as const;
@@ -27,6 +28,7 @@ type ProviderEarnings = Record<string, string>;
 export default function NewShiftScreen() {
   const { token } = useAuth();
   const colors = useColors();
+  const { t } = useLanguage();
   const [shiftDate, setShiftDate] = useState(new Date().toISOString().slice(0, 10));
   const [km, setKm] = useState('');
   const [minutes, setMinutes] = useState('');
@@ -74,14 +76,14 @@ export default function NewShiftScreen() {
       });
 
       router.back();
-      Alert.alert('Shift saved', 'Your profitability has been recalculated.');
+      Alert.alert(t('shift.saved'), t('shift.savedMessage'));
     } catch (saveError) {
       const message =
         saveError instanceof ApiError
           ? saveError.message
-          : 'The shift could not be saved. Try again.';
+          : t('shift.errorMessage');
 
-      Alert.alert('Could not save the shift', message);
+      Alert.alert(t('shift.errorTitle'), message);
     } finally {
       setIsSaving(false);
     }
@@ -97,13 +99,13 @@ export default function NewShiftScreen() {
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.headerRow}>
               <View style={styles.headerText}>
-                <AppText variant="title">Log a shift</AppText>
+                <AppText variant="title">{t('shift.title')}</AppText>
                 <AppText variant="caption" tone="muted">
-                  Today&apos;s numbers become your real profit per kilometre.
+                  {t('shift.subtitle')}
                 </AppText>
               </View>
               <Button
-                label="Cancel"
+                label={t('shift.cancel')}
                 variant="ghost"
                 fullWidth={false}
                 onPress={() => router.back()}
@@ -111,30 +113,30 @@ export default function NewShiftScreen() {
             </View>
 
             <GlassSurface style={styles.card}>
-              <Field label="DATE" value={shiftDate} onChangeText={setShiftDate} placeholder="2026-08-01" />
+              <Field label={t('shift.date')} value={shiftDate} onChangeText={setShiftDate} placeholder="2026-08-01" />
               <Field
-                label="KILOMETRES DRIVEN"
+                label={t('shift.kilometres')}
                 value={km}
                 onChangeText={setKm}
                 placeholder="184.5"
                 keyboardType="decimal-pad"
               />
               <Field
-                label="MINUTES CONNECTED"
+                label={t('shift.minutes')}
                 value={minutes}
                 onChangeText={setMinutes}
                 placeholder="420"
                 keyboardType="number-pad"
               />
               <Field
-                label="TRIPS COMPLETED"
+                label={t('shift.trips')}
                 value={trips}
                 onChangeText={setTrips}
                 placeholder="23"
                 keyboardType="number-pad"
               />
               <Field
-                label="FUEL SPENT (OPTIONAL)"
+                label={t('shift.fuel')}
                 value={fuelCost}
                 onChangeText={setFuelCost}
                 placeholder="38.50"
@@ -143,7 +145,7 @@ export default function NewShiftScreen() {
             </GlassSurface>
 
             <GlassSurface style={styles.card}>
-              <AppText variant="label">Earnings per platform</AppText>
+              <AppText variant="label">{t('shift.earnings')}</AppText>
               {PROVIDERS.map((provider) => (
                 <View key={provider} style={styles.earningRow}>
                   <AppText variant="caption" tone="muted" style={styles.earningLabel}>
@@ -167,20 +169,19 @@ export default function NewShiftScreen() {
 
               <View style={styles.totalRow}>
                 <AppText variant="caption" tone="muted">
-                  Gross total
+                  {t('shift.grossTotal')}
                 </AppText>
                 <AppText variant="heading" numeric tone="profit">
                   ${grossTotal.toFixed(2)}
                 </AppText>
               </View>
               <AppText variant="caption" tone="faint">
-                Fuel and depreciation are subtracted by the API to get your net profit
-                {fuel > 0 ? ` (fuel entered: $${fuel.toFixed(2)})` : ''}.
+                {t('shift.fuelDepreciation')}{fuel > 0 ? t('shift.fuelEntered', { amount: `$${fuel.toFixed(2)}` }) : ''}.
               </AppText>
             </GlassSurface>
 
             <Button
-              label={isSaving ? 'Saving…' : 'Save shift'}
+              label={isSaving ? t('shift.saving') : t('shift.save')}
               icon="checkmark"
               loading={isSaving}
               disabled={!canSave}

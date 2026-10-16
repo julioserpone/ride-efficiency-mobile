@@ -1,21 +1,23 @@
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from 'react-native';
-import { Redirect } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 import { Button } from '@/components/ui/button';
 import { GlassSurface } from '@/components/ui/glass-surface';
-import { AuroraBackground } from '@/components/ui/aurora-background';
 import { AppText } from '@/components/ui/text';
 import { API_BASE_URL } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
-import { Radius, Spacing } from '@/theme/tokens';
+import { useLanguage } from '@/lib/i18n';
 import { useColors } from '@/theme/theme-provider';
+import { Radius, Spacing } from '@/theme/tokens';
+import { Redirect } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
+import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 /** Sign-in screen. Issues a Sanctum personal access token for this device. */
 export default function LoginScreen() {
   const { token, isBootstrapping, isSigningIn, error, signIn, clearError } = useAuth();
   const colors = useColors();
+  const { t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -46,7 +48,7 @@ export default function LoginScreen() {
             <GlassSurface style={styles.card}>
               <View style={styles.field}>
                 <AppText variant="caption" tone="muted">
-                  EMAIL
+                  {t('login.email')}
                 </AppText>
                 <TextInput
                   value={email}
@@ -57,7 +59,7 @@ export default function LoginScreen() {
                   autoCapitalize="none"
                   autoComplete="email"
                   keyboardType="email-address"
-                  placeholder="driver@example.com"
+                  placeholder={t('login.emailPlaceholder')}
                   placeholderTextColor={colors.inkFaint}
                   style={[
                     styles.input,
@@ -68,7 +70,7 @@ export default function LoginScreen() {
 
               <View style={styles.field}>
                 <AppText variant="caption" tone="muted">
-                  PASSWORD
+                  {t('login.password')}
                 </AppText>
                 <TextInput
                   value={password}
@@ -94,7 +96,7 @@ export default function LoginScreen() {
               ) : null}
 
               <Button
-                label="Sign in"
+                label={isSigningIn ? t('login.signingIn') : t('login.signIn')}
                 icon="arrow.right"
                 loading={isSigningIn}
                 disabled={!canSubmit}

@@ -12,10 +12,11 @@ import { PremiumGate } from '@/components/ui/premium-gate';
 import { useAsync } from '@/hooks/use-async';
 import { usePremium } from '@/features/premium/use-premium';
 import { useAuth } from '@/lib/auth-store';
-import { fuelInvoices } from '@/lib/endpoints';
+import { energyInvoices } from '@/lib/endpoints';
 import { formatCurrency, formatDate, formatDateTime, toNumber } from '@/lib/format';
 import { Spacing } from '@/theme/tokens';
 import { useColors } from '@/theme/theme-provider';
+import { useLanguage } from '@/lib/i18n';
 
 /**
  * Receipt detail.
@@ -28,22 +29,23 @@ export default function ReceiptDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { token } = useAuth();
   const colors = useColors();
+  const { t } = useLanguage();
   const { isPremium } = usePremium();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const receiptId = Number(id);
   const { data, error, isLoading, refresh, isRefreshing } = useAsync(
-    () => fuelInvoices.show(token!, receiptId),
+    () => energyInvoices.show(token!, receiptId),
     [token, receiptId],
   );
 
   const invoice = data?.invoice;
 
   const confirmDelete = useCallback(() => {
-    Alert.alert('Delete receipt', 'The image and its extracted data will be removed.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('receiptDetail.deleteTitle'), t('receiptDetail.deleteMessage'), [
+      { text: t('profile.cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('receiptDetail.delete'),
         style: 'destructive',
         onPress: async () => {
           if (!token) {
@@ -53,7 +55,7 @@ export default function ReceiptDetailScreen() {
           setIsDeleting(true);
 
           try {
-            await fuelInvoices.remove(token, receiptId);
+            await energyInvoices.remove(token, receiptId);
             router.back();
           } finally {
             setIsDeleting(false);
@@ -61,7 +63,7 @@ export default function ReceiptDetailScreen() {
         },
       },
     ]);
-  }, [receiptId, token]);
+  }, [receiptId, t, token]);
 
   return (
     <AuroraBackground>
@@ -79,7 +81,7 @@ export default function ReceiptDetailScreen() {
         >
           <View style={styles.headerRow}>
             <Button
-              label="Close"
+              label={t('receiptDetail.close')}
               variant="ghost"
               fullWidth={false}
               onPress={() => router.back()}
@@ -93,16 +95,16 @@ export default function ReceiptDetailScreen() {
             </AppText>
           ) : error || !invoice ? (
             <GlassSurface style={styles.card}>
-              <AppText variant="heading">Receipt unavailable</AppText>
+              <AppText variant="heading">{t('receiptDetail.unavailable')}</AppText>
               <AppText variant="caption" tone="loss">
-                {error ?? 'This receipt no longer exists.'}
+                {error ?? t('receiptDetail.notFound')}
               </AppText>
             </GlassSurface>
           ) : (
             <>
               <GlassSurface style={styles.hero}>
                 <AppText variant="caption" tone="muted">
-                  TOTAL PAID
+                  {t('receiptDetail.totalPaid')}
                 </AppText>
                 <AppText variant="display" numeric tone="neutral">
                   {formatCurrency(invoice.total_amount_paid)}
@@ -115,45 +117,47 @@ export default function ReceiptDetailScreen() {
               <GlassSurface style={styles.card}>
                 <DetailRow
                   icon="drop.fill"
-                  label="Fuel volume"
-                  value={
-                    invoice.fuel_volume_units === null
-                      ? '—'
-                      : `${toNumber(invoice.fuel_volume_units)} L`
-                  }
+                  label={t('receiptDetail.title')}
+                  value={invoice.energy_amount === null
+                    ? (invoice.fuel_volume_units === null ? '—' : `${toNumber(invoice.fuel_volume_units)} L`)
+                    : `${toNumber(invoice.energy_amount)} ${invoice.energy_unit ?? ''}`}
                 />
                 <DetailRow
                   icon="fuelpump.fill"
-                  label="Fuel type"
-                  value={invoice.fuel_type ?? '—'}
+                  label={t('receiptDetail.type')}
+                  value={invoice.fuel_type ?? invoice.energy_type ?? '—'}
                 />
                 <DetailRow
                   icon="calendar"
-                  label="Invoice date"
+                  label={t('receiptDetail.date')}
                   value={formatDate(invoice.invoice_date)}
                 />
                 <DetailRow
                   icon="clock"
-                  label="Uploaded"
+                  label={t('receiptDetail.uploaded')}
                   value={formatDateTime(invoice.created_at)}
                 />
-                {invoice.fuel_volume_units && invoice.total_amount_paid ? (
+                {(invoice.energy_amount ?? invoice.fuel_volume_units) && invoice.total_amount_paid ? (
                   <DetailRow
                     icon="tag.fill"
-                    label="Price per litre"
+                    label={t('receiptDetail.unitPrice', { unit: invoice.energy_unit ?? 'unit' })}
                     value={formatCurrency(
-                      toNumber(invoice.total_amount_paid) / toNumber(invoice.fuel_volume_units),
+                      toNumber(invoice.unit_price) || toNumber(invoice.total_amount_paid) / toNumber(invoice.energy_amount ?? invoice.fuel_volume_units),
+                      invoice.currency_code ?? 'USD',
                     )}
                   />
                 ) : null}
               </GlassSurface>
 
+              {invoice.status === 'review_required' ? (
+                <Button label="Review extracted details" icon="pencil" variant="secondary" onPress={() => router.push('/receipts')} />
+              ) : null}
+
               {invoice.status !== 'completed' ? (
                 <GlassSurface style={styles.notice}>
                   <SymbolView name="info.circle" size={15} tintColor={colors.neutral} />
                   <AppText variant="caption" tone="muted" style={styles.noticeText}>
-                    The OCR job is still running. Pull down to refresh and the extracted numbers
-                    will appear here.
+                    {t('receiptDetail.notice')}
                   </AppText>
                 </GlassSurface>
               ) : null}
@@ -163,16 +167,16 @@ export default function ReceiptDetailScreen() {
                 isPremium={isPremium}
                 unlocked={
                   <GlassSurface style={styles.card}>
-                    <AppText variant="label">Raw OCR text</AppText>
+                    <AppText variant="label">{t('receiptDetail.rawText')}</AppText>
                     <AppText variant="caption" tone="muted" style={styles.ocr}>
-                      {invoice.ocr_raw_text ?? 'Nothing was extracted from this image.'}
+                      {invoice.ocr_raw_text ?? t('receiptDetail.emptyText')}
                     </AppText>
                   </GlassSurface>
                 }
               />
 
               <Button
-                label={isDeleting ? 'Deleting…' : 'Delete receipt'}
+                label={isDeleting ? t('receiptDetail.deleting') : t('receiptDetail.delete')}
                 icon="trash"
                 variant="danger"
                 loading={isDeleting}

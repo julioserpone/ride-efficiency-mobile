@@ -148,23 +148,7 @@ const messages = {
     "stats.week": "week",
     "stats.month": "month",
     "stats.loading": "Loading…",
-    "shiftDetail.title": "Shift",
-    "shiftDetail.subtitle": "Profit and activity breakdown",
-    "shiftDetail.close": "Close",
-    "shiftDetail.loading": "Loading shift…",
-    "shiftDetail.unavailable": "Shift unavailable",
-    "shiftDetail.notFound": "This shift no longer exists.",
-    "shiftDetail.netProfit": "NET PROFIT",
-    "shiftDetail.afterCosts": "after energy and depreciation",
-    "shiftDetail.grossEarnings": "Gross earnings",
-    "shiftDetail.energyApplied": "Energy applied",
-    "shiftDetail.depreciation": "Depreciation",
-    "shiftDetail.distance": "Distance",
-    "shiftDetail.connectedTime": "Connected time",
-    "shiftDetail.trips": "Trips completed",
-    "shiftDetail.offers": "Offers scanned",
-    "shiftDetail.profitPerKm": "Profit per km",
-    "shiftDetail.byPlatform": "Earnings per platform",
+    "shiftDetail.title": "Shift", "shiftDetail.subtitle": "Profit and activity breakdown", "shiftDetail.close": "Close", "shiftDetail.loading": "Loading shift…", "shiftDetail.unavailable": "Shift unavailable", "shiftDetail.notFound": "This shift no longer exists.", "shiftDetail.netProfit": "NET PROFIT", "shiftDetail.afterCosts": "after energy and depreciation", "shiftDetail.grossEarnings": "Gross earnings", "shiftDetail.energyApplied": "Energy applied", "shiftDetail.depreciation": "Depreciation", "shiftDetail.distance": "Distance", "shiftDetail.connectedTime": "Connected time", "shiftDetail.trips": "Trips completed", "shiftDetail.offers": "Offers scanned", "shiftDetail.profitPerKm": "Profit per km", "shiftDetail.byPlatform": "Earnings per platform",
 
     "shiftList.title": "Shifts",
     "shiftList.subtitle": "Profit per day, after energy and wear",
@@ -496,23 +480,7 @@ const messages = {
     "stats.week": "semana",
     "stats.month": "mes",
     "stats.loading": "Cargando…",
-    "shiftDetail.title": "Turno",
-    "shiftDetail.subtitle": "Desglose de actividad y ganancias",
-    "shiftDetail.close": "Cerrar",
-    "shiftDetail.loading": "Cargando turno…",
-    "shiftDetail.unavailable": "Turno no disponible",
-    "shiftDetail.notFound": "Este turno ya no existe.",
-    "shiftDetail.netProfit": "UTILIDAD NETA",
-    "shiftDetail.afterCosts": "después de energía y depreciación",
-    "shiftDetail.grossEarnings": "Ingresos brutos",
-    "shiftDetail.energyApplied": "Energía aplicada",
-    "shiftDetail.depreciation": "Depreciación",
-    "shiftDetail.distance": "Distancia",
-    "shiftDetail.connectedTime": "Tiempo conectado",
-    "shiftDetail.trips": "Viajes completados",
-    "shiftDetail.offers": "Ofertas escaneadas",
-    "shiftDetail.profitPerKm": "Utilidad por km",
-    "shiftDetail.byPlatform": "Ingresos por plataforma",
+    "shiftDetail.title": "Turno", "shiftDetail.subtitle": "Desglose de actividad y ganancias", "shiftDetail.close": "Cerrar", "shiftDetail.loading": "Cargando turno…", "shiftDetail.unavailable": "Turno no disponible", "shiftDetail.notFound": "Este turno ya no existe.", "shiftDetail.netProfit": "UTILIDAD NETA", "shiftDetail.afterCosts": "después de energía y depreciación", "shiftDetail.grossEarnings": "Ingresos brutos", "shiftDetail.energyApplied": "Energía aplicada", "shiftDetail.depreciation": "Depreciación", "shiftDetail.distance": "Distancia", "shiftDetail.connectedTime": "Tiempo conectado", "shiftDetail.trips": "Viajes completados", "shiftDetail.offers": "Ofertas escaneadas", "shiftDetail.profitPerKm": "Utilidad por km", "shiftDetail.byPlatform": "Ingresos por plataforma",
 
     "shiftList.title": "Turnos",
     "shiftList.subtitle": "Utilidad diaria después de energía y desgaste",
@@ -712,6 +680,7 @@ const messages = {
   },
 } as const;
 
+
 export function getAppLanguage(): AppLanguage {
   return currentLanguage;
 }
@@ -770,13 +739,13 @@ export async function initializeLanguage(): Promise<AppLanguage> {
     const saved = await AsyncStorage.getItem(STORAGE_KEY);
     const deviceLanguage = getLocales()[0]?.languageCode;
     currentLanguage =
-      saved === "en" || saved === "es"
+      saved === 'en' || saved === 'es'
         ? saved
-        : deviceLanguage === "es"
-          ? "es"
-          : "en";
+        : deviceLanguage === 'es'
+          ? 'es'
+          : 'en';
   } catch {
-    currentLanguage = "en";
+    currentLanguage = 'en';
   }
   listeners.forEach((listener) => listener(currentLanguage));
   return currentLanguage;

@@ -4,10 +4,10 @@ import { SymbolView } from 'expo-symbols';
 import { GlassSurface } from '@/components/ui/glass-surface';
 import { AppText } from '@/components/ui/text';
 import type { PremiumFeature } from '@/features/premium/premium-config';
-import { PREMIUM_FEATURES } from '@/features/premium/premium-config';
 import { usePremium } from '@/features/premium/use-premium';
 import { Radius, Spacing } from '@/theme/tokens';
 import { useColors } from '@/theme/theme-provider';
+import { useLanguage } from '@/lib/i18n';
 
 export type PremiumGateProps = {
   feature: PremiumFeature;
@@ -23,8 +23,11 @@ export type PremiumGateProps = {
  */
 export function PremiumGate({ feature, unlocked, isPremium }: PremiumGateProps) {
   const colors = useColors();
+  const { t } = useLanguage();
   const account = usePremium();
-  const { title, description } = PREMIUM_FEATURES[feature];
+  const featureKey = feature === 'trends' ? 'trends' : feature === 'photos' ? 'photos' : 'efficiency';
+  const title = t(`premium.feature.${featureKey}.title`);
+  const description = t(`premium.feature.${featureKey}.description`);
   const isUnlocked = isPremium ?? account.isPremium;
 
   if (isUnlocked) {
@@ -47,7 +50,7 @@ export function PremiumGate({ feature, unlocked, isPremium }: PremiumGateProps) 
         accessibilityRole="button"
         style={styles.cta}
       >
-        Unlock with Premium →
+        {t('premium.upgrade')} →
       </AppText>
     </GlassSurface>
   );
