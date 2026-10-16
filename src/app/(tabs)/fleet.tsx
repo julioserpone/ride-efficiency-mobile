@@ -13,7 +13,7 @@ import { useLanguage } from '@/lib/i18n';
 import type { Country, EnergyType, RideTrip, Vehicle } from '@/lib/types';
 import { useColors } from '@/theme/theme-provider';
 import { Radius, Spacing } from '@/theme/tokens';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
@@ -140,7 +140,7 @@ export default function FleetScreen() {
   };
 
   return (
-    <Screen title={t('fleet.title')} subtitle={t('fleet.subtitle')} contentStyle={styles.screen}>
+    <Screen title={t('fleet.title')} subtitle={t('fleet.subtitle')} contentStyle={styles.screen} headerAccessory={<UserAvatar />}>
       {error ? <AppText variant="caption" tone="loss">{error}</AppText> : null}
       {notice ? <AppText variant="caption" tone="profit">{notice}</AppText> : null}
       <SectionCard title={t('fleet.vehiclesTitle')} subtitle={vehicleList.length === 1 ? t('fleet.vehicleCountOne') : t('fleet.vehicleCount', { count: vehicleList.length })} padded={false}>
@@ -151,7 +151,7 @@ export default function FleetScreen() {
             subtitle={t('fleet.details')}
             value={item.commission_rate ? `${toNumber(item.commission_rate)}% fee` : undefined}
             accessory={selectedVehicle === item.id ? <SymbolView name="checkmark.circle.fill" size={20} tintColor={colors.primary} /> : undefined}
-            onPress={() => setSelectedVehicle(item.id)} />
+            onPress={() => { setSelectedVehicle(item.id); router.push(`/vehicle/${item.id}`); }} />
         ))}
       </SectionCard>
 

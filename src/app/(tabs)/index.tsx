@@ -101,17 +101,9 @@ export default function DashboardScreen() {
         title={t('home.weeks')}
         subtitle={t('home.weekSubtitle')}
         action={
-          <View style={styles.cardAction}>
-            <View style={styles.legend}>
-              <View style={[styles.dot, { backgroundColor: colors.primary }]} />
-              <AppText variant="caption" tone="muted">
-                {t('home.profit')}
-              </AppText>
-            </View>
-            <AppText variant="label" tone="primary" onPress={() => router.push('/stats')}>
-              {t('home.viewStats')}
-            </AppText>
-          </View>
+          <AppText variant="label" tone="primary" onPress={() => router.push('/stats')}>
+            {t('home.viewStats')}
+          </AppText>
         }
       >
         {weekly.isLoading ? (
@@ -125,7 +117,9 @@ export default function DashboardScreen() {
           />
         ) : (
           <>
-            <Sparkline values={weeks.map((week) => week.total_net_profit)} height={64} />
+            <View style={styles.chartContainer}>
+              <Sparkline values={weeks.map((week) => week.total_net_profit)} height={64} />
+            </View>
             <View style={styles.trendRow}>
               <AppText variant="caption" tone="faint">
                 {formatDate(weeks[0]?.week_start)}
@@ -201,4 +195,5 @@ const styles = StyleSheet.create({
   trendRow: { flexDirection: 'row', justifyContent: 'space-between' },
   actions: { gap: Spacing.sm },
   cardAction: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  chartContainer: { paddingVertical: Spacing.xs },
 });

@@ -34,6 +34,7 @@ export default function ShiftsScreen() {
       title={t('shiftList.title')}
       subtitle={t('shiftList.subtitle')}
       contentStyle={styles.content}
+      headerAccessory={<UserAvatar />}
     >
       <View style={styles.grid}>
         <StatTile

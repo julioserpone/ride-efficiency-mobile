@@ -59,7 +59,7 @@ export default function StatsScreen() {
   const error = weekly.error ?? summary.error ?? efficiency.error;
 
   return (
-    <Screen title={t('stats.title')} subtitle={t('stats.subtitle')}>
+    <Screen title={t('stats.title')} subtitle={t('stats.subtitle')} headerAccessory={<UserAvatar />}>
       <SegmentedControl
         options={[
           { value: 'weekly', label: t('stats.weekly') },
