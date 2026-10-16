@@ -16,7 +16,7 @@ import type { EnergyType, EnergyUnit } from '@/lib/types';
 import { useColors } from '@/theme/theme-provider';
 import { Radius, Spacing } from '@/theme/tokens';
 import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, TextInput, View } from 'react-native';
@@ -115,6 +115,12 @@ export default function ReceiptsScreen() {
       setReviewCountry(result.countries[0]?.id ?? null);
     }).catch(() => undefined);
   }, [token]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void receipts.load();
+    }, [receipts])
+  );
 
   const saveReview = async () => {
     if (!token || reviewInvoiceId === null || !reviewCountry || Number(energyAmount) <= 0 || Number(unitPrice) <= 0) return;

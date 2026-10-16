@@ -1,17 +1,18 @@
-import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
-import { router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { Button } from '@/components/ui/button';
 import { GlassSurface } from '@/components/ui/glass-surface';
 import { AppText } from '@/components/ui/text';
-import { useAuth } from '@/lib/auth-store';
 import { ApiError } from '@/lib/api';
+import { useAuth } from '@/lib/auth-store';
 import { shifts } from '@/lib/endpoints';
-import { Radius, Spacing } from '@/theme/tokens';
-import { useColors } from '@/theme/theme-provider';
 import { useLanguage } from '@/lib/i18n';
+import { useColors } from '@/theme/theme-provider';
+import { Radius, Spacing } from '@/theme/tokens';
+import { router } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 /** Default platform list — matches the providers the API tracks per shift. */
 const PROVIDERS = ['Uber', 'DiDi', 'Lyft', 'inDrive', 'Cabify'] as const;
@@ -104,12 +105,11 @@ export default function NewShiftScreen() {
                   {t('shift.subtitle')}
                 </AppText>
               </View>
-              <Button
-                label={t('shift.cancel')}
-                variant="ghost"
-                fullWidth={false}
-                onPress={() => router.back()}
-              />
+              <TouchableOpacity onPress={() => router.back()} style={styles.closeButton}>
+                <GlassSurface style={styles.closeButtonGlass}>
+                  <SymbolView name="xmark" size={20} tintColor={colors.ink} />
+                </GlassSurface>
+              </TouchableOpacity>
             </View>
 
             <GlassSurface style={styles.card}>
@@ -234,6 +234,19 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.lg, gap: Spacing.lg, paddingBottom: Spacing.xxl },
   headerRow: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.md },
   headerText: { flex: 1, gap: Spacing.xs },
+  closeButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeButtonGlass: {
+    width: 36,
+    height: 36,
+    borderRadius: Radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   card: { padding: Spacing.lg, gap: Spacing.md },
   field: { gap: Spacing.xs },
   input: {
