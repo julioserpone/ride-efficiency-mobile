@@ -13,6 +13,8 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const __DEV__ = process.env.NODE_ENV === 'development';
+
 /** Sign-in screen. Issues a Sanctum personal access token for this device. */
 export default function LoginScreen() {
   const { token, isBootstrapping, isSigningIn, error, signIn, clearError } = useAuth();
@@ -104,9 +106,11 @@ export default function LoginScreen() {
               />
             </GlassSurface>
 
-            <AppText variant="caption" tone="faint" style={styles.endpoint}>
-              Connected to {API_BASE_URL}
-            </AppText>
+            {__DEV__ && (
+              <AppText variant="caption" tone="faint" style={styles.endpoint}>
+                Connected to {API_BASE_URL}
+              </AppText>
+            )}
           </View>
         </SafeAreaView>
       </KeyboardAvoidingView>

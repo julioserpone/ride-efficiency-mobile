@@ -241,6 +241,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const signOut = useCallback(async () => {
     const currentToken = token;
 
+    setIsSigningIn(false);
     await clearSession();
 
     if (currentToken) {
