@@ -1,6 +1,10 @@
+import { ApiError } from '@/lib/api';
+import { auth } from '@/lib/endpoints';
+import type { ApiUser } from '@/lib/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
-import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import {
   createContext,
   useCallback,
@@ -10,11 +14,7 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
-import { ApiError } from '@/lib/api';
-import { auth } from '@/lib/endpoints';
-import type { ApiUser } from '@/lib/types';
 
 const TOKEN_KEY = 'ride_efficiency_token';
 const USER_KEY = 'ride_efficiency_user';
@@ -137,7 +137,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const readCachedUser = async () => {
       const cached = await readSecret(USER_KEY);
 
-      if (cached && isMounted && user === null) {
+      if (cached && isMounted) {
         setUser(JSON.parse(cached) as ApiUser);
       }
     };
@@ -148,7 +148,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return () => {
       isMounted = false;
     };
-  }, [clearSession, persistSession, user]);
+  }, [clearSession, persistSession]);
 
   const signIn = useCallback(
     async (email: string, password: string) => {
