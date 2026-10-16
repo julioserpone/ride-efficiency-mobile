@@ -27,14 +27,24 @@ export type Paginated<T> = {
   next_page_url: string | null;
 };
 
-export type FuelInvoiceStatus = 'pending' | 'processing' | 'completed' | 'failed';
+export type FuelInvoiceStatus = 'pending' | 'processing' | 'review_required' | 'completed' | 'failed';
+export type EnergyUnit = 'gallons' | 'litres' | 'kwh';
+export type EnergyType = 'regular_gasoline' | 'premium_gasoline' | 'diesel' | 'ethanol' | 'lpg' | 'cng' | 'electric';
 
 export type FuelInvoice = {
   id: number;
   user_id: number;
   image_path: string;
+  country_id: number | null;
+  energy_product_id: number | null;
   total_amount_paid: Numeric | null;
+  energy_amount: Numeric | null;
   fuel_volume_units: Numeric | null;
+  energy_unit: EnergyUnit | null;
+  energy_type: EnergyType | null;
+  unit_price: Numeric | null;
+  currency_code: string | null;
+  vendor_name: string | null;
   fuel_type: string | null;
   invoice_date: string | null;
   status: FuelInvoiceStatus;
@@ -45,6 +55,91 @@ export type FuelInvoice = {
 
 export type FuelInvoiceListResponse = {
   invoices: Paginated<FuelInvoice>;
+};
+
+export type Country = {
+  id: number;
+  code: string;
+  name: string;
+  currency_code: string;
+  currency_symbol: string;
+};
+
+export type EnergyProduct = {
+  id: number;
+  code: string;
+  name: string;
+  energy_type: EnergyType;
+  energy_unit: EnergyUnit;
+};
+
+export type Vehicle = {
+  id: number;
+  country_id: number;
+  name: string;
+  energy_type: EnergyType;
+  energy_unit: EnergyUnit;
+  energy_economy: Numeric;
+  commission_rate: Numeric | null;
+  is_active: boolean;
+  country: Country;
+};
+
+export type RideTrip = {
+  id: number;
+  vehicle_id: number;
+  daily_shift_id: number | null;
+  platform_name: string;
+  currency_code: string;
+  gross_fare: Numeric;
+  distance_km: Numeric;
+  deadhead_distance_km: Numeric;
+  duration_minutes: number | null;
+  commission_rate: Numeric;
+  energy_price_per_unit: Numeric;
+  energy_cost: Numeric;
+  commission_cost: Numeric;
+  depreciation_cost: Numeric;
+  other_costs: Numeric;
+  net_profit: Numeric;
+  break_even_fare: Numeric;
+  verdict: 'accept' | 'marginal' | 'reject' | string;
+  created_at: string;
+  vehicle?: Vehicle;
+};
+
+export type EnergyInvoiceReviewPayload = {
+  country_id: number;
+  energy_type: EnergyType;
+  energy_unit: EnergyUnit;
+  energy_amount: number;
+  unit_price: number;
+  total_amount_paid?: number;
+  energy_product_id?: number;
+  fuel_type?: string;
+  tax_rate?: number;
+  invoice_date?: string;
+};
+
+export type CreateVehiclePayload = {
+  country_id: number;
+  name: string;
+  energy_type: EnergyType;
+  energy_unit: EnergyUnit;
+  energy_economy: number;
+  commission_rate?: number;
+};
+
+export type CreateRideTripPayload = {
+  platform_name: string;
+  gross_fare: number;
+  distance_km: number;
+  deadhead_distance_km?: number;
+  duration_minutes?: number;
+  commission_rate?: number;
+  other_costs_per_trip?: number;
+  daily_shift_id?: number;
+  energy_price_per_unit?: number;
 };
 
 export type FuelInvoiceResponse = {

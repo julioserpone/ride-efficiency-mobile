@@ -9,11 +9,11 @@ import { GlassSurface } from '@/components/ui/glass-surface';
 import { AppText } from '@/components/ui/text';
 import {
   PLANS,
-  PREMIUM_FEATURES,
   type PremiumFeature,
 } from '@/features/premium/premium-config';
 import { Radius, Spacing } from '@/theme/tokens';
 import { useColors } from '@/theme/theme-provider';
+import { useLanguage } from '@/lib/i18n';
 
 const ORDERED_FEATURES: PremiumFeature[] = [
   'trends',
@@ -33,13 +33,14 @@ const ORDERED_FEATURES: PremiumFeature[] = [
  */
 export default function PaywallScreen() {
   const colors = useColors();
+  const { t } = useLanguage();
   const [selectedPlan, setSelectedPlan] = useState(PLANS[1].id);
 
   const startCheckout = () => {
     Alert.alert(
-      'Billing not connected yet',
-      'The subscription flow is ready to be wired to the App Store and Google Play. In-app purchases are not enabled in this MVP build.',
-      [{ text: 'Got it' }],
+      t('premium.notConnected'),
+      t('premium.unavailable'),
+      [{ text: t('premium.close') }],
     );
   };
 
@@ -55,8 +56,7 @@ export default function PaywallScreen() {
               Ride Efficiency Premium
             </AppText>
             <AppText variant="caption" tone="muted" style={styles.centered}>
-              The free plan keeps tracking your fuel. Premium shows you where the money actually
-              goes.
+              {t('premium.subtitle')}
             </AppText>
           </View>
 
@@ -65,9 +65,9 @@ export default function PaywallScreen() {
               <View key={feature} style={styles.featureRow}>
                 <SymbolView name="checkmark.circle.fill" size={16} tintColor={colors.profit} />
                 <View style={styles.featureText}>
-                  <AppText variant="label">{PREMIUM_FEATURES[feature].title}</AppText>
+                  <AppText variant="label">{t(`premium.feature.${feature === 'trends' ? 'trends' : feature === 'photos' ? 'photos' : 'efficiency'}.title`)}</AppText>
                   <AppText variant="caption" tone="muted">
-                    {PREMIUM_FEATURES[feature].description}
+                    {t(`premium.feature.${feature === 'trends' ? 'trends' : feature === 'photos' ? 'photos' : 'efficiency'}.description`)}
                   </AppText>
                 </View>
               </View>
@@ -115,8 +115,8 @@ export default function PaywallScreen() {
             })}
           </View>
 
-          <Button label="Start premium" icon="sparkles" onPress={startCheckout} />
-          <Button label="Not now" variant="ghost" onPress={() => router.back()} />
+          <Button label={t('premium.upgrade')} icon="sparkles" onPress={startCheckout} />
+          <Button label={t('premium.close')} variant="ghost" onPress={() => router.back()} />
 
           <AppText variant="caption" tone="faint" style={styles.centered}>
             Cancel anytime from the App Store or Google Play. Prices shown in USD.

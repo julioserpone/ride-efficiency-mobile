@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useAuth } from '@/lib/auth-store';
 import { ApiError } from '@/lib/api';
-import { fuelInvoices } from '@/lib/endpoints';
+import { energyInvoices } from '@/lib/endpoints';
 import type { FuelInvoice, FuelInvoiceListResponse } from '@/lib/types';
 
 export type ReceiptsState = {
@@ -51,7 +51,7 @@ export function useReceipts(): ReceiptsState {
     setError(null);
 
     try {
-      applyResponse(await fuelInvoices.list(token));
+      applyResponse(await energyInvoices.list(token));
     } catch (loadError) {
       setError(loadError instanceof ApiError ? loadError.message : 'Could not load your receipts.');
     } finally {
@@ -67,7 +67,7 @@ export function useReceipts(): ReceiptsState {
     setIsRefreshing(true);
 
     try {
-      applyResponse(await fuelInvoices.list(token));
+      applyResponse(await energyInvoices.list(token));
       setError(null);
     } catch (refreshError) {
       setError(
@@ -93,7 +93,7 @@ export function useReceipts(): ReceiptsState {
         form.append('image', { uri, name, type } as unknown as Blob);
         form.append('invoice_date', invoiceDate ?? new Date().toISOString().slice(0, 10));
 
-        const response = await fuelInvoices.create(token, form);
+        const response = await energyInvoices.create(token, form);
 
         setInvoices((current) => [response.invoice, ...current]);
 
@@ -124,7 +124,7 @@ export function useReceipts(): ReceiptsState {
       setInvoices((current) => current.filter((invoice) => invoice.id !== id));
 
       try {
-        await fuelInvoices.remove(token, id);
+        await energyInvoices.remove(token, id);
       } catch (deleteError) {
         // Restore the row when the API rejects the deletion.
         setInvoices(previous);

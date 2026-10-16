@@ -1,19 +1,20 @@
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
 import { BarChart } from '@/components/charts/bar-chart';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { PremiumGate } from '@/components/ui/premium-gate';
 import { Screen } from '@/components/ui/screen';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import { StatTile } from '@/components/ui/stat-tile';
 import { AppText } from '@/components/ui/text';
+import { usePremium } from '@/features/premium/use-premium';
 import { useAsync } from '@/hooks/use-async';
 import { useAuth } from '@/lib/auth-store';
 import { stats } from '@/lib/endpoints';
 import { formatCurrency, formatDuration, formatKm } from '@/lib/format';
-import { usePremium } from '@/features/premium/use-premium';
-import { Radius, Spacing } from '@/theme/tokens';
+import { useLanguage } from '@/lib/i18n';
 import { useColors } from '@/theme/theme-provider';
-import { SegmentedControl } from '@/components/ui/segmented-control';
+import { Radius, Spacing } from '@/theme/tokens';
+import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 /**
  * Stats — fuel consumption, station spend and efficiency.
@@ -26,6 +27,7 @@ export default function StatsScreen() {
   const { token } = useAuth();
   const colors = useColors();
   const { isPremium } = usePremium();
+  const { t } = useLanguage();
   const [range, setRange] = useState<'weekly' | 'monthly'>('weekly');
 
   const weekly = useAsync(() => stats.weekly(token!), [token]);
@@ -57,11 +59,11 @@ export default function StatsScreen() {
   const error = weekly.error ?? summary.error ?? efficiency.error;
 
   return (
-    <Screen title="Stats" subtitle="Fuel, spend and efficiency over time">
+    <Screen title={t('stats.title')} subtitle={t('stats.subtitle')}>
       <SegmentedControl
         options={[
-          { value: 'weekly', label: 'Weekly' },
-          { value: 'monthly', label: 'Monthly' },
+          { value: 'weekly', label: t('stats.weekly') },
+          { value: 'monthly', label: t('stats.monthly') },
         ]}
         value={range}
         onChange={(value) => setRange(value as 'weekly' | 'monthly')}
@@ -69,39 +71,39 @@ export default function StatsScreen() {
 
       <View style={styles.grid}>
         <StatTile
-          label="Fuel spend"
+          label={t('stats.fuelSpend')}
           value={formatCurrency(totals?.total_fuel_cost)}
-          hint="all time"
+          hint={t('stats.allTime')}
           icon="fuelpump"
           tone="neutral"
         />
         <StatTile
-          label="Fuel / km"
+          label={t('stats.fuelPerKm')}
           value={formatCurrency(fuelPerKm)}
-          hint="cost per kilometre"
+          hint={t('stats.costPerKm')}
           icon="road.lanes"
         />
       </View>
 
       <View style={styles.grid}>
         <StatTile
-          label="Profit / km"
+          label={t('stats.profitPerKm')}
           value={formatCurrency(profitPerKm)}
-          hint="net of fuel + wear"
+          hint={t('stats.netEnergy')}
           icon="chart.line.uptrend.xyaxis"
           tone={profitPerKm >= 0 ? 'profit' : 'loss'}
         />
         <StatTile
-          label="Depreciation"
+          label={t('stats.depreciation')}
           value={formatCurrency(totals?.total_depreciation)}
-          hint="estimated wear"
+          hint={t('stats.estimatedWear')}
           icon="wrench.and.screwdriver"
         />
       </View>
 
-      <SectionCard title="Fuel spend" subtitle={`Per ${range === 'weekly' ? 'week' : 'month'}`}>
+      <SectionCard title={t('stats.fuelSpend')} subtitle={t('stats.spendPeriod', { period: t(range === 'weekly' ? 'stats.week' : 'stats.month') })}>
         {series.length === 0 ? (
-          <EmptyState message="No fuel spend recorded yet" />
+          <EmptyState message={t('stats.noSpend')} />
         ) : (
           <BarChart data={fuelBars} formatValue={(value) => formatCurrency(value, 'USD', null, { compact: true })} />
         )}
@@ -111,9 +113,9 @@ export default function StatsScreen() {
         feature="trends"
         isPremium={isPremium}
         unlocked={
-          <SectionCard title="Net profit trend" subtitle={`Per ${range === 'weekly' ? 'week' : 'month'}`}>
+          <SectionCard title={t('stats.profitTrend')} subtitle={t('stats.spendPeriod', { period: t(range === 'weekly' ? 'stats.week' : 'stats.month') })}>
             {series.length === 0 ? (
-              <EmptyState message="No shifts recorded yet" hint="Log a shift to see the trend." />
+              <EmptyState message={t('stats.noShifts')} hint={t('stats.logShift')} />
             ) : (
               <BarChart
                 data={bars}
@@ -128,29 +130,29 @@ export default function StatsScreen() {
         feature="efficiency"
         isPremium={isPremium}
         unlocked={
-          <SectionCard title="Efficiency" subtitle="How each hour of work pays off">
+          <SectionCard title={t('stats.efficiency')} subtitle={t('stats.hourEfficiency')}>
             <View style={styles.efficiencyGrid}>
               <MiniStat
-                label="Profit / hour"
+                label={t('stats.profitHour')}
                 value={formatCurrency(efficiency.data?.efficiency.profit_per_hour ?? 0)}
               />
               <MiniStat
-                label="Minutes / shift"
+                label={t('stats.minutesShift')}
                 value={formatDuration(efficiency.data?.efficiency.avg_minutes_per_shift ?? 0)}
               />
               <MiniStat
-                label="Km / shift"
+                label={t('stats.kmShift')}
                 value={formatKm(efficiency.data?.efficiency.avg_km_per_shift ?? 0)}
               />
               <MiniStat
-                label="Profit / km"
+                label={t('stats.profitPerKm')}
                 value={formatCurrency(profitPerKm)}
               />
             </View>
             {summary.data?.best_shift ? (
               <View style={styles.bestRow}>
                 <AppText variant="caption" tone="muted">
-                  Best shift
+                  {t('stats.bestShift')}
                 </AppText>
                 <AppText variant="label" tone="profit" numeric>
                   {formatCurrency(summary.data.best_shift.real_net_profit)} ·{' '}

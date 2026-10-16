@@ -1,6 +1,3 @@
-import { Alert, StyleSheet, View } from 'react-native';
-import { router } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { Button } from '@/components/ui/button';
 import { GlassSurface } from '@/components/ui/glass-surface';
 import { ListRow } from '@/components/ui/list-row';
@@ -10,8 +7,12 @@ import { AppText } from '@/components/ui/text';
 import { usePremium } from '@/features/premium/use-premium';
 import { API_BASE_URL } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
-import { Radius, Spacing } from '@/theme/tokens';
+import { useLanguage } from '@/lib/i18n';
 import { useAppTheme, useColors } from '@/theme/theme-provider';
+import { Radius, Spacing } from '@/theme/tokens';
+import { router } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
+import { Alert, StyleSheet, View } from 'react-native';
 
 /** Account screen: session, subscription entry point and app information. */
 export default function ProfileScreen() {
@@ -19,6 +20,7 @@ export default function ProfileScreen() {
   const { mode } = useAppTheme();
   const colors = useColors();
   const { isPremium } = usePremium();
+  const { language, setLanguage, t } = useLanguage();
 
   const initials = (user?.name ?? 'R')
     .split(' ')
@@ -28,14 +30,14 @@ export default function ProfileScreen() {
     .toUpperCase();
 
   const confirmSignOut = () => {
-    Alert.alert('Sign out', 'This device will be unlinked from your account.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign out', style: 'destructive', onPress: () => void signOut() },
+    Alert.alert(t('profile.signOut'), t('profile.signOutMessage'), [
+      { text: t('profile.cancel'), style: 'cancel' },
+      { text: t('profile.signOut'), style: 'destructive', onPress: () => void signOut() },
     ]);
   };
 
   return (
-    <Screen title="Account" subtitle="Plan, session and app details">
+    <Screen title={t('profile.title')} subtitle={t('profile.subtitle')}>
       <GlassSurface style={styles.hero}>
         <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
           <AppText variant="title" style={styles.avatarText}>
@@ -43,7 +45,7 @@ export default function ProfileScreen() {
           </AppText>
         </View>
         <View style={styles.heroText}>
-          <AppText variant="heading">{user?.name ?? 'Driver'}</AppText>
+          <AppText variant="heading">{user?.name ?? t('profile.driver')}</AppText>
           <AppText variant="caption" tone="muted">
             {user?.email ?? '—'}
           </AppText>
@@ -55,16 +57,16 @@ export default function ProfileScreen() {
         <SymbolView name="sparkles" size={20} tintColor={colors.primary} />
         <View style={styles.upsellText}>
           <AppText variant="label">
-            {isPremium ? 'Premium is active' : 'Unlock the full analytics'}
+            {isPremium ? t('profile.premiumActive') : t('profile.featureTitle')}
           </AppText>
           <AppText variant="caption" tone="muted">
             {isPremium
-              ? 'Thanks for supporting the app. Every feature is unlocked.'
-              : 'Trend charts, efficiency scorecards and receipt history.'}
+              ? t('profile.premiumThanks')
+              : t('profile.featureText')}
           </AppText>
         </View>
         <Button
-          label={isPremium ? 'Manage' : 'Upgrade'}
+          label={isPremium ? t('profile.manage') : t('profile.upgrade')}
           variant={isPremium ? 'secondary' : 'primary'}
           fullWidth={false}
           onPress={() => router.push('/paywall')}
@@ -73,29 +75,37 @@ export default function ProfileScreen() {
       </GlassSurface>
 
       <GlassSurface style={styles.card}>
-        <ListRow icon="doc.text" title="Fuel invoices" subtitle="Your scanned receipts" onPress={() => router.push('/receipts')} />
-        <ListRow icon="car" title="Shifts" subtitle="Daily profitability ledger" onPress={() => router.push('/shifts')} />
-        <ListRow icon="chart.bar.xaxis" title="Statistics" subtitle="Fuel, spend and efficiency" onPress={() => router.push('/stats')} />
+        <ListRow icon="doc.text" title={t('profile.invoiceItem')} subtitle={t('profile.scannedReceipts')} onPress={() => router.push('/receipts')} />
+        <ListRow icon="car.side" title={t('profile.vehicles')} subtitle={t('profile.vehiclesSubtitle')} onPress={() => router.push('/vehicles')} />
+        <ListRow icon="point.topleft.down.curvedto.point.bottomright.up" title={t('profile.rideTrips')} subtitle={t('profile.rideTripsSubtitle')} onPress={() => router.push('/ride-trips')} />
+        <ListRow icon="car" title={t('profile.shiftItem')} subtitle={t('profile.shiftSubtitle')} onPress={() => router.push('/shifts')} />
+        <ListRow icon="chart.bar.xaxis" title={t('profile.statsItem')} subtitle={t('profile.statisticsSubtitle')} onPress={() => router.push('/stats')} />
       </GlassSurface>
 
       <GlassSurface style={styles.card}>
         <ListRow
           icon="server.rack"
-          title="API endpoint"
+          title={t('profile.apiStatus')}
           subtitle={API_BASE_URL}
           valueTone="muted"
         />
         <ListRow
           icon={mode === 'dark' ? 'moon' : 'sun.max'}
-          title="Appearance"
-          subtitle={`Following system · ${mode}`}
+          title={t('profile.appearance')}
+          subtitle={t('profile.appearanceStatus', { mode })}
+        />
+        <ListRow
+          icon="globe"
+          title={t('profile.language')}
+          subtitle={language === 'es' ? 'Español' : 'English'}
+          onPress={() => void setLanguage(language === 'es' ? 'en' : 'es')}
         />
       </GlassSurface>
 
-      <Button label="Sign out" icon="rectangle.portrait.and.arrow.right" variant="danger" onPress={confirmSignOut} />
+      <Button label={t('profile.signOut')} icon="rectangle.portrait.and.arrow.right" variant="danger" onPress={confirmSignOut} />
 
       <AppText variant="caption" tone="faint" style={styles.version}>
-        Ride Efficiency · version 1.0.0 (MVP)
+        {t('profile.accountVersion')}
       </AppText>
     </Screen>
   );

@@ -1,5 +1,6 @@
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import { AppText } from '@/components/ui/text';
 import { Spacing } from '@/theme/tokens';
@@ -45,29 +46,34 @@ export function Screen({
   if (!scroll) {
     return (
       <AuroraBackground>
-        <View style={[styles.content, contentStyle]}>
-          {header}
-          {children}
-        </View>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={[styles.content, contentStyle]}>
+            {header}
+            {children}
+          </View>
+        </SafeAreaView>
       </AuroraBackground>
     );
   }
 
   return (
     <AuroraBackground>
-      <ScrollView
-        contentContainerStyle={[styles.content, contentStyle]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {header}
-        {children}
-      </ScrollView>
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView
+          contentContainerStyle={[styles.content, contentStyle]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {header}
+          {children}
+        </ScrollView>
+      </SafeAreaView>
     </AuroraBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: { flex: 1 },
   content: {
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,

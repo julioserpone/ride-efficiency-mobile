@@ -1,0 +1,37 @@
+name: Feature request
+description: Suggest a product or engineering improvement.
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues first. Keep proposals focused on a single improvement.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or user need
+      description: What are you trying to do, and what is difficult today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the smallest useful change and how it should behave.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any alternatives or tradeoffs worth considering?
+    validations:
+      required: false
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting context
+      description: Screenshots or links are welcome. Remove personal and sensitive data.
+    validations:
+      required: false

@@ -3,7 +3,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from '@/lib/auth-store';
+import { initializeLanguage } from '@/lib/i18n';
 import { AppThemeProvider, useAppTheme } from '@/theme/theme-provider';
+import { useEffect } from 'react';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -16,11 +18,18 @@ function StatusBarForTheme() {
   return <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />;
 }
 
+function LanguageBootstrap() {
+  useEffect(() => { void initializeLanguage(); }, []);
+  return null;
+}
+
 export default function RootLayout() {
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppThemeProvider>
         <AuthProvider>
+          <LanguageBootstrap />
           {/* Screens paint their own aurora background, so the stacks are transparent. */}
           <Stack
             screenOptions={{
@@ -33,6 +42,7 @@ export default function RootLayout() {
             <Stack.Screen name="login" options={{ animation: 'fade' }} />
             <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
             <Stack.Screen name="receipt/[id]" />
+            <Stack.Screen name="shift/[id]" options={{ presentation: 'modal' }} />
             <Stack.Screen name="shift/new" options={{ presentation: 'modal' }} />
           </Stack>
           <StatusBarForTheme />

@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a reproducible problem in Ride Efficiency Mobile.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please search existing issues first. Do not include passwords, API tokens, private receipts, or other sensitive data.
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected instead.
+      placeholder: A clear, concise description.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include the screen and steps that lead to the issue.
+      placeholder: |
+        1. Open …
+        2. Tap …
+        3. Observe …
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Device/simulator, OS version, and app build or commit.
+      placeholder: iPhone simulator, iOS …
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or logs
+      description: Attach a screenshot or sanitized error log. Remove personal and sensitive data.
+    validations:
+      required: false

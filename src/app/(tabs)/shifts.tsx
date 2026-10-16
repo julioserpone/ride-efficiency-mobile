@@ -1,5 +1,3 @@
-import { router } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
 import { Button } from '@/components/ui/button';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { ListRow } from '@/components/ui/list-row';
@@ -10,7 +8,10 @@ import { useAsync } from '@/hooks/use-async';
 import { useAuth } from '@/lib/auth-store';
 import { shifts } from '@/lib/endpoints';
 import { formatCurrency, formatDate, formatDuration, formatKm, toNumber } from '@/lib/format';
+import { useLanguage } from '@/lib/i18n';
 import { Spacing } from '@/theme/tokens';
+import { router } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 /**
  * Shifts — the daily ledger.
@@ -20,6 +21,7 @@ import { Spacing } from '@/theme/tokens';
  */
 export default function ShiftsScreen() {
   const { token } = useAuth();
+  const { t } = useLanguage();
   const { data, error, isLoading } = useAsync(() => shifts.list(token!), [token]);
 
   const summary = data?.summary;
@@ -29,21 +31,21 @@ export default function ShiftsScreen() {
 
   return (
     <Screen
-      title="Shifts"
-      subtitle="Profit per day, after fuel and wear"
+      title={t('shiftList.title')}
+      subtitle={t('shiftList.subtitle')}
       contentStyle={styles.content}
     >
       <View style={styles.grid}>
         <StatTile
-          label="Shifts"
+          label={t('shiftList.count')}
           value={String(summary?.total_shifts ?? 0)}
-          hint="logged"
+          hint={t('shiftList.logged')}
           icon="calendar"
         />
         <StatTile
-          label="Avg / shift"
+          label={t('shiftList.avg')}
           value={formatCurrency(avgProfitPerShift, 'USD', null, { compact: true })}
-          hint="net profit"
+          hint={t('shiftList.netProfit')}
           icon="chart.bar"
           tone={avgProfitPerShift >= 0 ? 'profit' : 'loss'}
         />
@@ -51,35 +53,35 @@ export default function ShiftsScreen() {
 
       <View style={styles.grid}>
         <StatTile
-          label="Distance"
+          label={t('shiftList.distance')}
           value={formatKm(summary?.total_km_gps)}
-          hint="gps tracked"
+          hint={t('shiftList.gps')}
           icon="road.lanes"
         />
         <StatTile
-          label="Trips"
+          label={t('shiftList.trips')}
           value={String(summary?.total_trips_completed ?? 0)}
-          hint="completed"
+          hint={t('shiftList.completed')}
           icon="checkmark.circle"
         />
       </View>
 
       <Button
-        label="Log a shift"
+        label={t('shiftList.log')}
         icon="plus"
         variant="secondary"
         onPress={() => router.push('/shift/new')}
       />
 
-      <SectionCard title="History" subtitle="Newest first" padded={false}>
+      <SectionCard title={t('shiftList.history')} subtitle={t('shiftList.newest')} padded={false}>
         {isLoading ? (
           <AppText variant="caption" tone="muted">
-            Loading shifts…
+            {t('shiftList.loading')}
           </AppText>
         ) : rows.length === 0 ? (
           <EmptyState
-            message="No shifts yet"
-            hint="Log today's shift to start tracking your real profit."
+            message={t('shiftList.empty')}
+            hint={t('shiftList.emptyHint')}
           />
         ) : (
           rows.map((shift) => (
@@ -87,9 +89,7 @@ export default function ShiftsScreen() {
               key={shift.id}
               icon="car"
               title={formatDate(shift.shift_date)}
-              subtitle={`${formatKm(shift.total_km_gps)} · ${formatDuration(
-                shift.total_minutes_connected,
-              )} · fuel ${formatCurrency(shift.applied_fuel_cost, 'USD', null, { compact: true })}`}
+              subtitle={t('shiftList.gpsFuel', { km: formatKm(shift.total_km_gps), duration: formatDuration(shift.total_minutes_connected), cost: formatCurrency(shift.applied_fuel_cost, 'USD', null, { compact: true })})}
               value={formatCurrency(shift.real_net_profit)}
               valueTone={toNumber(shift.real_net_profit) >= 0 ? 'profit' : 'loss'}
               onPress={() => router.push(`/shift/${shift.id}`)}
