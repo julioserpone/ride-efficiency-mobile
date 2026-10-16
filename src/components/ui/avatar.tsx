@@ -1,13 +1,12 @@
-import { View } from 'react-native';
+import { AppText } from '@/components/ui/text';
+import { usePremium } from '@/features/premium/use-premium';
+import { useAuth } from '@/lib/auth-store';
+import { useColors } from '@/theme/theme-provider';
+import { Radius } from '@/theme/tokens';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { AppText } from '@/components/ui/text';
-import { useAuth } from '@/lib/auth-store';
-import { usePremium } from '@/features/premium/use-premium';
-import { useColors } from '@/theme/theme-provider';
-import { Radius, Spacing } from '@/theme/tokens';
+import { StyleSheet, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { StyleSheet } from 'react-native';
 
 export function UserAvatar({ size = 40 }: { size?: number }) {
   const { user } = useAuth();

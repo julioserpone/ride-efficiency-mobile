@@ -1,53 +1,50 @@
+import { UserAvatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { ListRow } from '@/components/ui/list-row';
 import { Screen } from '@/components/ui/screen';
 import { AppText } from '@/components/ui/text';
-import { UserAvatar } from '@/components/ui/avatar';
 import { useAuth } from '@/lib/auth-store';
 import { vehicles } from '@/lib/endpoints';
-import { formatCurrency, formatKm, toNumber } from '@/lib/format';
+import { toNumber } from '@/lib/format';
 import { useLanguage } from '@/lib/i18n';
-import { useColors } from '@/theme/theme-provider';
-import { Radius, Spacing } from '@/theme/tokens';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import { useCallback, useEffect, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
 import type { Vehicle } from '@/lib/types';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert } from 'react-native';
 
 export default function VehicleDetailScreen() {
   const { token } = useAuth();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
-  const colors = useColors();
   const { t } = useLanguage();
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    if (!token || !id) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await vehicles.list(token);
-      const found = result.vehicles.data.find((v) => v.id === Number(id));
-      if (found) {
-        setVehicle(found);
-      } else {
-        setError(t('profile.vehicleNotFound'));
-      }
-    } catch (e) {
-      setError(t('profile.loadError'));
-    } finally {
-      setLoading(false);
-    }
-  }, [token, id, t]);
-
   useEffect(() => {
-    void load();
-  }, [load]);
+    let isMounted = true;
+    void (async () => {
+      if (!token || !id) return;
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await vehicles.list(token);
+        const found = result.vehicles.data.find((v) => v.id === Number(id));
+        if (isMounted) {
+          if (found) {
+            setVehicle(found);
+          } else {
+            setError(t('profile.vehicleNotFound'));
+          }
+        }
+      } catch {
+        if (isMounted) setError(t('profile.loadError'));
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    })();
+    return () => { isMounted = false; };
+  }, [token, id, t]);
 
   const deleteVehicle = () => {
     Alert.alert(
@@ -100,5 +97,3 @@ export default function VehicleDetailScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({});

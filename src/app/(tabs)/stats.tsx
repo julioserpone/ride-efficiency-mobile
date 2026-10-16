@@ -1,4 +1,5 @@
 import { BarChart } from '@/components/charts/bar-chart';
+import { UserAvatar } from '@/components/ui/avatar';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { PremiumGate } from '@/components/ui/premium-gate';
 import { Screen } from '@/components/ui/screen';

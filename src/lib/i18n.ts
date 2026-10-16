@@ -267,6 +267,7 @@ const messages = {
     "home.logShift": "Log a shift",
     "profile.title": "Account",
     "profile.subtitle": "App settings and preferences",
+    "profile.redirect": "Tap the avatar in the top right to access account settings",
     "profile.featureTitle": "Unlock the full analytics",
     "profile.featureText":
       "Trend charts, efficiency scorecards and receipt history.",
@@ -637,6 +638,7 @@ const messages = {
 
     "profile.title": "Cuenta",
     "profile.subtitle": "Configuración y preferencias de la app",
+    "profile.redirect": "Toca el avatar en la esquina superior derecha para acceder a la configuración",
     "profile.featureTitle": "Desbloquea todos los análisis",
     "profile.featureText": "Tendencias, eficiencia e historial de facturas.",
     "profile.invoiceItem": "Facturas de energía",
