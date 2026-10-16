@@ -2,6 +2,7 @@ import { ApiError } from '@/lib/api';
 import { auth } from '@/lib/endpoints';
 import type { ApiUser } from '@/lib/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { aesDecryptAsync, aesEncryptAsync, AESEncryptionKey, AESSealedData } from 'expo-crypto';
 import * as Device from 'expo-device';
 import { router } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
@@ -18,18 +19,26 @@ import { Platform } from 'react-native';
 
 const TOKEN_KEY = 'ride_efficiency_token';
 const USER_KEY = 'ride_efficiency_user';
+const ENCRYPTION_KEY_KEY = 'ride_efficiency_encryption_key';
 
 /**
  * `expo-secure-store` has no web implementation, so the token falls back to
  * AsyncStorage when the app runs on the web target. Native builds always use
  * the Keychain / Keystore.
+ *
+ * NOTE: Web does not use encryption because SecureStore is not available.
+ * For production web apps, consider using a more secure storage solution.
  */
 async function readSecret(key: string): Promise<string | null> {
   if (Platform.OS === 'web') {
     return AsyncStorage.getItem(key);
   }
 
-  return SecureStore.getItemAsync(key);
+  const encrypted = await SecureStore.getItemAsync(key);
+  if (!encrypted) return null;
+
+  const decrypted = await decryptData(encrypted);
+  return decrypted;
 }
 
 async function writeSecret(key: string, value: string): Promise<void> {
@@ -39,7 +48,8 @@ async function writeSecret(key: string, value: string): Promise<void> {
     return;
   }
 
-  await SecureStore.setItemAsync(key, value);
+  const encrypted = await encryptData(value);
+  await SecureStore.setItemAsync(key, encrypted);
 }
 
 async function deleteSecret(key: string): Promise<void> {
@@ -50,6 +60,56 @@ async function deleteSecret(key: string): Promise<void> {
   }
 
   await SecureStore.deleteItemAsync(key);
+}
+
+/**
+ * Get or generate an AES encryption key for encrypting sensitive data.
+ * The key is stored in SecureStore and reused across app sessions.
+ */
+async function getOrCreateEncryptionKey(): Promise<AESEncryptionKey> {
+  try {
+    const existingKeyHex = await readSecret(ENCRYPTION_KEY_KEY);
+    if (existingKeyHex) {
+      return await AESEncryptionKey.import(existingKeyHex, 'hex');
+    }
+  } catch {
+    // If key is corrupted, generate a new one
+  }
+
+  const newKey = await AESEncryptionKey.generate(256);
+  const keyHex = await newKey.encoded('hex');
+  await writeSecret(ENCRYPTION_KEY_KEY, keyHex);
+  return newKey;
+}
+
+/**
+ * Encrypt sensitive data before storing it locally.
+ * This ensures that even if the device is compromised, the data is protected.
+ *
+ * NOTE: This only encrypts local storage. Data transmitted to the API is
+ * already protected by HTTPS (TLS encryption at the transport layer).
+ */
+async function encryptData(plaintext: string): Promise<string> {
+  const key = await getOrCreateEncryptionKey();
+  const plaintextBase64 = btoa(plaintext);
+  const sealedData = await aesEncryptAsync(plaintextBase64, key);
+  const encryptedBytes = await sealedData.combined();
+  return btoa(String.fromCharCode(...encryptedBytes));
+}
+
+/**
+ * Decrypt sensitive data that was stored locally.
+ */
+async function decryptData(encryptedBase64: string): Promise<string | null> {
+  try {
+    const key = await getOrCreateEncryptionKey();
+    const encryptedBytes = Uint8Array.from(atob(encryptedBase64), (c) => c.charCodeAt(0));
+    const sealedData = AESSealedData.fromCombined(encryptedBytes);
+    const decryptedBase64 = await aesDecryptAsync(sealedData, key, { output: 'base64' });
+    return atob(decryptedBase64);
+  } catch {
+    return null;
+  }
 }
 
 /** Stable token name so sessions are recognisable in the API's token list. */
@@ -94,7 +154,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setToken(null);
     setUser(null);
 
-    await Promise.all([deleteSecret(TOKEN_KEY), deleteSecret(USER_KEY)]);
+    await Promise.all([
+      deleteSecret(TOKEN_KEY),
+      deleteSecret(USER_KEY),
+      deleteSecret(ENCRYPTION_KEY_KEY),
+    ]);
   }, []);
 
   // Restore the session on cold start. The token is verified against the API
