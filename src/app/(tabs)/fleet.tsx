@@ -1,7 +1,9 @@
+import { UserAvatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { ListRow } from '@/components/ui/list-row';
 import { Screen } from '@/components/ui/screen';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import { AppText } from '@/components/ui/text';
 import { useTripForm } from '@/hooks/use-trip-form';
 import { useVehicleForm } from '@/hooks/use-vehicle-form';
@@ -32,6 +34,7 @@ export default function FleetScreen() {
   const { token } = useAuth();
   const colors = useColors();
   const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState<'vehicles' | 'trips'>('vehicles');
   const [countryList, setCountryList] = useState<Country[]>([]);
   const [vehicleList, setVehicleList] = useState<Vehicle[]>([]);
   const [tripList, setTripList] = useState<RideTrip[]>([]);
@@ -139,66 +142,76 @@ export default function FleetScreen() {
     catch (cause) { setError(cause instanceof ApiError ? cause.message : t('fleet.detailsError')); }
   };
 
+  const tabs = [
+    { value: 'vehicles', label: t('fleet.vehiclesTitle') },
+    { value: 'trips', label: t('fleet.rideTrips') },
+  ];
+
   return (
     <Screen title={t('fleet.title')} subtitle={t('fleet.subtitle')} contentStyle={styles.screen} headerAccessory={<UserAvatar />}>
       {error ? <AppText variant="caption" tone="loss">{error}</AppText> : null}
       {notice ? <AppText variant="caption" tone="profit">{notice}</AppText> : null}
-      <SectionCard title={t('fleet.vehiclesTitle')} subtitle={vehicleList.length === 1 ? t('fleet.vehicleCountOne') : t('fleet.vehicleCount', { count: vehicleList.length })} padded={false}>
-        {loading ? <AppText variant="caption" tone="muted">{t('fleet.loading')}</AppText> : vehicleList.length === 0 ? (
-          <EmptyState message={t('fleet.noVehicles')} hint={t('fleet.noVehiclesHint')} />
-        ) : vehicleList.map((item) => (
-          <ListRow key={item.id} icon={item.energy_type === 'electric' ? 'bolt.fill' : 'car.fill'} title={item.name}
-            subtitle={t('fleet.details')}
-            value={item.commission_rate ? `${toNumber(item.commission_rate)}% fee` : undefined}
-            accessory={selectedVehicle === item.id ? <SymbolView name="checkmark.circle.fill" size={20} tintColor={colors.primary} /> : undefined}
-            onPress={() => { setSelectedVehicle(item.id); router.push(`/vehicle/${item.id}`); }} />
-        ))}
-      </SectionCard>
+      
+      <SegmentedControl options={tabs} value={activeTab} onChange={(v) => setActiveTab(v as 'vehicles' | 'trips')} />
 
-      <SectionCard title={t('fleet.addVehicle')} subtitle={t('fleet.addSubtitle')}>
-        <View style={styles.pills}>{countryList.map((item: Country) => <Choice key={item.id} label={item.code} active={vehicleForm.selectedCountry === item.id} onPress={() => vehicleForm.setSelectedCountry(item.id)} />)}</View>
-        <Field label={t('fleet.vehicleName')} value={vehicleForm.vehicleName} onChangeText={vehicleForm.setVehicleName} placeholder="e.g. Toyota Corolla 2022" />
-        <AppText variant="caption" tone="muted">{t('fleet.energyType')}</AppText>
-        <View style={styles.pills}>{localizedEnergyTypes.map((item) => <Choice key={item.value} label={item.label} active={vehicleForm.energyType === item.value} onPress={() => vehicleForm.setEnergyType(item.value)} />)}</View>
-        <Field label={t(vehicleForm.energyUnit === 'kwh' ? 'fleet.economyKwh' : 'fleet.economyLitre')} value={vehicleForm.economy} onChangeText={vehicleForm.setEconomy} placeholder="12.5" keyboardType="decimal-pad" />
-        <Field label={t('fleet.commission')} value={vehicleForm.commission} onChangeText={vehicleForm.setCommission} placeholder="20" keyboardType="decimal-pad" />
-        <Button label={savingVehicle ? t('fleet.saving') : t('fleet.add')} icon="plus" loading={savingVehicle} disabled={!countryList.length || !vehicleForm.isValid} onPress={() => void createVehicle()} />
-      </SectionCard>
+      {activeTab === 'vehicles' ? (
+        <>
+          <SectionCard title={t('fleet.vehiclesTitle')} subtitle={vehicleList.length === 1 ? t('fleet.vehicleCountOne') : t('fleet.vehicleCount', { count: vehicleList.length })} padded={false}>
+            {loading ? <AppText variant="caption" tone="muted">{t('fleet.loading')}</AppText> : vehicleList.length === 0 ? (
+              <EmptyState message={t('fleet.noVehicles')} hint={t('fleet.noVehiclesHint')} />
+            ) : vehicleList.map((item) => (
+              <ListRow key={item.id} icon={item.energy_type === 'electric' ? 'bolt.fill' : 'car.fill'} title={item.name}
+                subtitle={t('fleet.details')}
+                value={item.commission_rate ? `${toNumber(item.commission_rate)}% fee` : undefined}
+                accessory={selectedVehicle === item.id ? <SymbolView name="checkmark.circle.fill" size={20} tintColor={colors.primary} /> : undefined}
+                onPress={() => { setSelectedVehicle(item.id); router.push(`/vehicle/${item.id}`); }} />
+            ))}
+          </SectionCard>
 
-      <View style={styles.sectionDivider}>
-        <AppText variant="caption" tone="muted" style={styles.dividerText}>{t('fleet.rideTrips')}</AppText>
-      </View>
+          <SectionCard title={t('fleet.addVehicle')} subtitle={t('fleet.addSubtitle')}>
+            <View style={styles.pills}>{countryList.map((item: Country) => <Choice key={item.id} label={item.code} active={vehicleForm.selectedCountry === item.id} onPress={() => vehicleForm.setSelectedCountry(item.id)} />)}</View>
+            <Field label={t('fleet.vehicleName')} value={vehicleForm.vehicleName} onChangeText={vehicleForm.setVehicleName} placeholder="e.g. Toyota Corolla 2022" />
+            <AppText variant="caption" tone="muted">{t('fleet.energyType')}</AppText>
+            <View style={styles.pills}>{localizedEnergyTypes.map((item) => <Choice key={item.value} label={item.label} active={vehicleForm.energyType === item.value} onPress={() => vehicleForm.setEnergyType(item.value)} />)}</View>
+            <Field label={t(vehicleForm.energyUnit === 'kwh' ? 'fleet.economyKwh' : 'fleet.economyLitre')} value={vehicleForm.economy} onChangeText={vehicleForm.setEconomy} placeholder="12.5" keyboardType="decimal-pad" />
+            <Field label={t('fleet.commission')} value={vehicleForm.commission} onChangeText={vehicleForm.setCommission} placeholder="20" keyboardType="decimal-pad" />
+            <Button label={savingVehicle ? t('fleet.saving') : t('fleet.add')} icon="plus" loading={savingVehicle} disabled={!countryList.length || !vehicleForm.isValid} onPress={() => void createVehicle()} />
+          </SectionCard>
+        </>
+      ) : (
+        <>
+          <SectionCard title={t('fleet.calculate')} subtitle={vehicle ? t('fleet.usingVehicle', { name: vehicle.name, currency: country?.currency_code ?? vehicle.country.currency_code }) : t('fleet.selectVehicle')}>
+            {vehicleList.length === 0 ? <AppText variant="caption" tone="muted">{t('fleet.vehicleRequired')}</AppText> : <>
+              <View style={styles.pills}>{vehicleList.map((item) => <Choice key={item.id} label={item.name} active={selectedVehicle === item.id} onPress={() => setSelectedVehicle(item.id)} />)}</View>
+              <Field label={t('fleet.platform')} value={tripForm.platform} onChangeText={tripForm.setPlatform} placeholder="Uber, Lyft…" />
+              <View style={styles.formRow}>
+                <Field label={t('fleet.fare')} value={tripForm.fare} onChangeText={tripForm.setFare} placeholder="18.50" keyboardType="decimal-pad" />
+                <Field label={t('fleet.distance')} value={tripForm.distance} onChangeText={tripForm.setDistance} placeholder="12.4" keyboardType="decimal-pad" />
+              </View>
+              <View style={styles.formRow}>
+                <Field label={t('fleet.deadhead')} value={tripForm.deadhead} onChangeText={tripForm.setDeadhead} placeholder="0" keyboardType="decimal-pad" />
+                <Field label={t('fleet.duration')} value={tripForm.duration} onChangeText={tripForm.setDuration} placeholder="25" keyboardType="number-pad" />
+              </View>
+              <Field label={t('fleet.energyOverride')} value={tripForm.energyPrice} onChangeText={tripForm.setEnergyPrice} placeholder={t('fleet.invoicePriceHint')} keyboardType="decimal-pad" />
+              {!hasMatchingEnergyInvoice && !tripForm.energyPrice ? <AppText variant="caption" tone="neutral">{t('fleet.noMatchingEnergy')}</AppText> : null}
+              <Button label={savingTrip ? t('fleet.calculating') : t('fleet.calculateButton')} icon="function" loading={savingTrip} disabled={!selectedVehicle || !tripForm.isValid} onPress={() => void calculateTrip()} />
+            </>}
+          </SectionCard>
 
-      <SectionCard title={t('fleet.calculate')} subtitle={vehicle ? t('fleet.usingVehicle', { name: vehicle.name, currency: country?.currency_code ?? vehicle.country.currency_code }) : t('fleet.selectVehicle')}>
-        {vehicleList.length === 0 ? <AppText variant="caption" tone="muted">{t('fleet.vehicleRequired')}</AppText> : <>
-          <View style={styles.pills}>{vehicleList.map((item) => <Choice key={item.id} label={item.name} active={selectedVehicle === item.id} onPress={() => setSelectedVehicle(item.id)} />)}</View>
-          <Field label={t('fleet.platform')} value={tripForm.platform} onChangeText={tripForm.setPlatform} placeholder="Uber, Lyft…" />
-          <View style={styles.formRow}>
-            <Field label={t('fleet.fare')} value={tripForm.fare} onChangeText={tripForm.setFare} placeholder="18.50" keyboardType="decimal-pad" />
-            <Field label={t('fleet.distance')} value={tripForm.distance} onChangeText={tripForm.setDistance} placeholder="12.4" keyboardType="decimal-pad" />
-          </View>
-          <View style={styles.formRow}>
-            <Field label={t('fleet.deadhead')} value={tripForm.deadhead} onChangeText={tripForm.setDeadhead} placeholder="0" keyboardType="decimal-pad" />
-            <Field label={t('fleet.duration')} value={tripForm.duration} onChangeText={tripForm.setDuration} placeholder="25" keyboardType="number-pad" />
-          </View>
-          <Field label={t('fleet.energyOverride')} value={tripForm.energyPrice} onChangeText={tripForm.setEnergyPrice} placeholder={t('fleet.invoicePriceHint')} keyboardType="decimal-pad" />
-          {!hasMatchingEnergyInvoice && !tripForm.energyPrice ? <AppText variant="caption" tone="neutral">{t('fleet.noMatchingEnergy')}</AppText> : null}
-          <Button label={savingTrip ? t('fleet.calculating') : t('fleet.calculateButton')} icon="function" loading={savingTrip} disabled={!selectedVehicle || !tripForm.isValid} onPress={() => void calculateTrip()} />
-        </>}
-      </SectionCard>
+          {tripDetail ? <SectionCard title={t('fleet.latestCalculation')} subtitle={`${tripDetail.platform_name} · ${formatDate(tripDetail.created_at)}`}>
+            <View style={styles.resultRow}><AppText variant="caption" tone="muted">{t('fleet.netProfit')}</AppText><AppText variant="title" tone={toNumber(tripDetail.net_profit) >= 0 ? 'profit' : 'loss'}>{formatCurrency(tripDetail.net_profit, tripDetail.currency_code)}</AppText></View>
+            <View style={styles.resultRow}><AppText variant="caption" tone="muted">{t('fleet.grossFare')}</AppText><AppText variant="label">{formatCurrency(tripDetail.gross_fare, tripDetail.currency_code)}</AppText></View>
+            <View style={styles.resultRow}><AppText variant="caption" tone="muted">{t('fleet.costBreakdown')}</AppText><AppText variant="label">{formatCurrency(toNumber(tripDetail.energy_cost) + toNumber(tripDetail.commission_cost) + toNumber(tripDetail.depreciation_cost), tripDetail.currency_code)}</AppText></View>
+            <View style={styles.resultRow}><AppText variant="caption" tone="muted">{t('fleet.breakEven')}</AppText><AppText variant="label">{formatCurrency(tripDetail.break_even_fare, tripDetail.currency_code)} · {tripDetail.verdict}</AppText></View>
+          </SectionCard> : null}
 
-      {tripDetail ? <SectionCard title={t('fleet.latestCalculation')} subtitle={`${tripDetail.platform_name} · ${formatDate(tripDetail.created_at)}`}>
-        <View style={styles.resultRow}><AppText variant="caption" tone="muted">{t('fleet.netProfit')}</AppText><AppText variant="title" tone={toNumber(tripDetail.net_profit) >= 0 ? 'profit' : 'loss'}>{formatCurrency(tripDetail.net_profit, tripDetail.currency_code)}</AppText></View>
-        <View style={styles.resultRow}><AppText variant="caption" tone="muted">{t('fleet.grossFare')}</AppText><AppText variant="label">{formatCurrency(tripDetail.gross_fare, tripDetail.currency_code)}</AppText></View>
-        <View style={styles.resultRow}><AppText variant="caption" tone="muted">{t('fleet.costBreakdown')}</AppText><AppText variant="label">{formatCurrency(toNumber(tripDetail.energy_cost) + toNumber(tripDetail.commission_cost) + toNumber(tripDetail.depreciation_cost), tripDetail.currency_code)}</AppText></View>
-        <View style={styles.resultRow}><AppText variant="caption" tone="muted">{t('fleet.breakEven')}</AppText><AppText variant="label">{formatCurrency(tripDetail.break_even_fare, tripDetail.currency_code)} · {tripDetail.verdict}</AppText></View>
-      </SectionCard> : null}
-
-      <SectionCard title={t('fleet.recentRides')} subtitle={t('fleet.recentRidesSubtitle')} padded={false}>
-        {loading ? <AppText variant="caption" tone="muted">Loading rides…</AppText> : tripList.length === 0 ? <EmptyState message={t('fleet.noRides')} hint={t('fleet.noRidesHint')} /> : tripList.map((trip) => (
-          <ListRow key={trip.id} icon="car.side" title={`${trip.platform_name} · ${formatKm(trip.distance_km)}`} subtitle={`${formatDate(trip.created_at)} · ${trip.verdict}`} value={formatCurrency(trip.net_profit, trip.currency_code)} valueTone={toNumber(trip.net_profit) >= 0 ? 'profit' : 'loss'} onPress={() => void openTrip(trip)} />
-        ))}
-      </SectionCard>
+          <SectionCard title={t('fleet.recentRides')} subtitle={t('fleet.recentRidesSubtitle')} padded={false}>
+            {loading ? <AppText variant="caption" tone="muted">Loading rides…</AppText> : tripList.length === 0 ? <EmptyState message={t('fleet.noRides')} hint={t('fleet.noRidesHint')} /> : tripList.map((trip) => (
+              <ListRow key={trip.id} icon="car.side" title={`${trip.platform_name} · ${formatKm(trip.distance_km)}`} subtitle={`${formatDate(trip.created_at)} · ${trip.verdict}`} value={formatCurrency(trip.net_profit, trip.currency_code)} valueTone={toNumber(trip.net_profit) >= 0 ? 'profit' : 'loss'} onPress={() => void openTrip(trip)} />
+            ))}
+          </SectionCard>
+        </>
+      )}
     </Screen>
   );
 }
@@ -219,6 +232,4 @@ const styles = StyleSheet.create({
   choice: { overflow: 'hidden', borderWidth: 1, borderRadius: Radius.pill, paddingHorizontal: Spacing.md, paddingVertical: Spacing.sm },
   input: { height: 46, borderRadius: Radius.md, borderWidth: StyleSheet.hairlineWidth, paddingHorizontal: Spacing.md, fontSize: 16 },
   resultRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md },
-  sectionDivider: { paddingVertical: Spacing.sm },
-  dividerText: { textAlign: 'center', textTransform: 'uppercase', letterSpacing: 1 },
 });
