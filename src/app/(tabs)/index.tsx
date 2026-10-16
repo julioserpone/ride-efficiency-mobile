@@ -1,4 +1,5 @@
 import { Sparkline } from '@/components/charts/sparkline';
+import { UserAvatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { ListRow } from '@/components/ui/list-row';
@@ -11,7 +12,6 @@ import { useAuth } from '@/lib/auth-store';
 import { stats } from '@/lib/endpoints';
 import { formatCurrency, formatDate, formatKm, percentChange, toNumber } from '@/lib/format';
 import { useLanguage } from '@/lib/i18n';
-import { useColors } from '@/theme/theme-provider';
 import { Radius, Spacing } from '@/theme/tokens';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
@@ -25,7 +25,6 @@ import { StyleSheet, View } from 'react-native';
  */
 export default function DashboardScreen() {
   const { token, user } = useAuth();
-  const colors = useColors();
   const { t } = useLanguage();
   const summary = useAsync(() => stats.summary(token!), [token]);
   const weekly = useAsync(() => stats.weekly(token!), [token]);
@@ -52,6 +51,7 @@ export default function DashboardScreen() {
     <Screen
       title={t('home.greeting', { name: user?.name?.split(' ')[0] ?? t('profile.driver') })}
       subtitle={t('home.subtitle')}
+      headerAccessory={<UserAvatar />}
     >
       <View style={styles.heroRow}>
         <StatTile
@@ -100,17 +100,9 @@ export default function DashboardScreen() {
         title={t('home.weeks')}
         subtitle={t('home.weekSubtitle')}
         action={
-          <View style={styles.cardAction}>
-            <View style={styles.legend}>
-              <View style={[styles.dot, { backgroundColor: colors.primary }]} />
-              <AppText variant="caption" tone="muted">
-                {t('home.profit')}
-              </AppText>
-            </View>
-            <AppText variant="label" tone="primary" onPress={() => router.push('/stats')}>
-              {t('home.viewStats')}
-            </AppText>
-          </View>
+          <AppText variant="label" tone="primary" onPress={() => router.push('/stats')}>
+            {t('home.viewStats')}
+          </AppText>
         }
       >
         {weekly.isLoading ? (
@@ -124,7 +116,9 @@ export default function DashboardScreen() {
           />
         ) : (
           <>
-            <Sparkline values={weeks.map((week) => week.total_net_profit)} height={64} />
+            <View style={styles.chartContainer}>
+              <Sparkline values={weeks.map((week) => week.total_net_profit)} height={64} />
+            </View>
             <View style={styles.trendRow}>
               <AppText variant="caption" tone="faint">
                 {formatDate(weeks[0]?.week_start)}
@@ -200,4 +194,5 @@ const styles = StyleSheet.create({
   trendRow: { flexDirection: 'row', justifyContent: 'space-between' },
   actions: { gap: Spacing.sm },
   cardAction: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  chartContainer: { paddingVertical: Spacing.xs },
 });

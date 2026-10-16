@@ -45,9 +45,9 @@ export default function TabsLayout() {
         <NativeTabs.Trigger.Icon sf="car.2" drawable="ic_fleet" />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="profile">
-        <NativeTabs.Trigger.Label>{t('nav.account')}</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="person.crop.circle" drawable="ic_account" />
+      <NativeTabs.Trigger name="stats">
+        <NativeTabs.Trigger.Label>{t('nav.stats')}</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="chart.bar.xaxis" drawable="ic_stats" />
       </NativeTabs.Trigger>
     </NativeTabs>
   );

@@ -1,3 +1,4 @@
+import { UserAvatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { GlassSurface } from '@/components/ui/glass-surface';
@@ -10,9 +11,9 @@ import { ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { countries as countriesApi, energyInvoices } from '@/lib/endpoints';
 import { formatCurrency, formatDate, toNumber } from '@/lib/format';
+import { useLanguage } from '@/lib/i18n';
 import type { EnergyType, EnergyUnit } from '@/lib/types';
 import { useColors } from '@/theme/theme-provider';
-import { useLanguage } from '@/lib/i18n';
 import { Radius, Spacing } from '@/theme/tokens';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
@@ -137,7 +138,7 @@ export default function ReceiptsScreen() {
   };
 
   return (
-    <Screen title={t('receipt.title')} subtitle={t('receipt.subtitle')}>
+    <Screen title={t('receipt.title')} subtitle={t('receipt.subtitle')} headerAccessory={<UserAvatar />}>
       <GlassSurface style={styles.capture}>
         <View style={[styles.captureIcon, { backgroundColor: colors.primary }]}>
           <SymbolView name="camera.viewfinder" size={30} tintColor="#FFFFFF" />

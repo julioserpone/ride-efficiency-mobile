@@ -1,4 +1,5 @@
 import { BarChart } from '@/components/charts/bar-chart';
+import { UserAvatar } from '@/components/ui/avatar';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { PremiumGate } from '@/components/ui/premium-gate';
 import { Screen } from '@/components/ui/screen';
@@ -59,7 +60,7 @@ export default function StatsScreen() {
   const error = weekly.error ?? summary.error ?? efficiency.error;
 
   return (
-    <Screen title={t('stats.title')} subtitle={t('stats.subtitle')}>
+    <Screen title={t('stats.title')} subtitle={t('stats.subtitle')} headerAccessory={<UserAvatar />}>
       <SegmentedControl
         options={[
           { value: 'weekly', label: t('stats.weekly') },

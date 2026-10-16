@@ -1,3 +1,4 @@
+import { UserAvatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { EmptyState, SectionCard } from '@/components/ui/card';
 import { ListRow } from '@/components/ui/list-row';
@@ -34,6 +35,7 @@ export default function ShiftsScreen() {
       title={t('shiftList.title')}
       subtitle={t('shiftList.subtitle')}
       contentStyle={styles.content}
+      headerAccessory={<UserAvatar />}
     >
       <View style={styles.grid}>
         <StatTile
