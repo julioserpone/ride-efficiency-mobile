@@ -11,6 +11,7 @@ import { shifts } from '@/lib/endpoints';
 import { formatCurrency, formatDate, formatDuration, formatKm, toNumber } from '@/lib/format';
 import { Spacing } from '@/theme/tokens';
 import { useColors } from '@/theme/theme-provider';
+import { useLanguage } from '@/lib/i18n';
 
 /**
  * Shift detail — the profitability breakdown of a single day.
@@ -22,6 +23,7 @@ export default function ShiftDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { token } = useAuth();
   const colors = useColors();
+  const { t } = useLanguage();
   const shiftId = Number(id);
 
   const { data, error, isLoading } = useAsync(() => shifts.show(token!, shiftId), [token, shiftId]);
@@ -36,62 +38,67 @@ export default function ShiftDetailScreen() {
 
   return (
     <AuroraBackground>
-      <SafeAreaView style={styles.flex} edges={['bottom']}>
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <SafeAreaView style={styles.flex} edges={['top', 'bottom']}>
+        <View style={styles.screenContent}>
           <View style={styles.headerRow}>
-            <AppText variant="title" style={styles.title}>
-              {shift ? formatDate(shift.shift_date) : 'Shift'}
-            </AppText>
-            <Button label="Close" variant="ghost" fullWidth={false} onPress={() => router.back()} />
+            <View style={styles.headerText}>
+              <AppText variant="title" style={styles.title}>
+                {shift ? formatDate(shift.shift_date) : t('shiftDetail.title')}
+              </AppText>
+              <AppText variant="caption" tone="muted">{t('shiftDetail.subtitle')}</AppText>
+            </View>
+            <Button label={t('shiftDetail.close')} variant="ghost" fullWidth={false} onPress={() => router.back()} />
           </View>
+
+          <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
           {isLoading ? (
             <AppText variant="caption" tone="muted">
-              Loading shift…
+              {t('shiftDetail.loading')}
             </AppText>
           ) : error || !shift ? (
             <GlassSurface style={styles.card}>
-              <AppText variant="heading">Shift unavailable</AppText>
+              <AppText variant="heading">{t('shiftDetail.unavailable')}</AppText>
               <AppText variant="caption" tone="loss">
-                {error ?? 'This shift no longer exists.'}
+                {error ?? t('shiftDetail.notFound')}
               </AppText>
             </GlassSurface>
           ) : (
             <>
               <GlassSurface style={styles.hero}>
                 <AppText variant="caption" tone="muted">
-                  NET PROFIT
+                  {t('shiftDetail.netProfit')}
                 </AppText>
                 <AppText variant="display" numeric tone={netTone}>
                   {formatCurrency(shift.real_net_profit)}
                 </AppText>
                 <AppText variant="caption" tone="muted">
-                  after fuel and depreciation
+                  {t('shiftDetail.afterCosts')}
                 </AppText>
               </GlassSurface>
 
               <GlassSurface style={styles.card}>
-                <Line label="Gross earnings" value={formatCurrency(gross)} />
-                <Line label="Fuel applied" value={`− ${formatCurrency(shift.applied_fuel_cost)}`} />
+                <Line label={t('shiftDetail.grossEarnings')} value={formatCurrency(gross)} />
+                <Line label={t('shiftDetail.energyApplied')} value={`− ${formatCurrency(shift.applied_fuel_cost)}`} />
                 <Line
-                  label="Depreciation"
+                  label={t('shiftDetail.depreciation')}
                   value={`− ${formatCurrency(shift.estimated_depreciation)}`}
                 />
                 <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                <Line label="Net profit" value={formatCurrency(shift.real_net_profit)} tone={netTone} />
+                <Line label={t('shiftDetail.netProfit')} value={formatCurrency(shift.real_net_profit)} tone={netTone} />
               </GlassSurface>
 
               <GlassSurface style={styles.card}>
-                <Line label="Distance" value={formatKm(shift.total_km_gps)} />
+                <Line label={t('shiftDetail.distance')} value={formatKm(shift.total_km_gps)} />
                 <Line
-                  label="Connected time"
+                  label={t('shiftDetail.connectedTime')}
                   value={formatDuration(shift.total_minutes_connected)}
                 />
-                <Line label="Trips completed" value={String(shift.total_trips_completed)} />
-                <Line label="Offers scanned" value={String(shift.total_offers_scanned)} />
+                <Line label={t('shiftDetail.trips')} value={String(shift.total_trips_completed)} />
+                <Line label={t('shiftDetail.offers')} value={String(shift.total_offers_scanned)} />
                 {toNumber(shift.total_km_gps) > 0 ? (
                   <Line
-                    label="Profit per km"
+                    label={t('shiftDetail.profitPerKm')}
                     value={formatCurrency(netProfit / toNumber(shift.total_km_gps))}
                   />
                 ) : null}
@@ -99,7 +106,7 @@ export default function ShiftDetailScreen() {
 
               {(shift.earnings ?? []).length > 0 ? (
                 <GlassSurface style={styles.card}>
-                  <AppText variant="label">Earnings per platform</AppText>
+                  <AppText variant="label">{t('shiftDetail.byPlatform')}</AppText>
                   {(shift.earnings ?? []).map((earning) => (
                     <Line
                       key={earning.id}
@@ -111,7 +118,8 @@ export default function ShiftDetailScreen() {
               ) : null}
             </>
           )}
-        </ScrollView>
+          </ScrollView>
+        </View>
       </SafeAreaView>
     </AuroraBackground>
   );
@@ -140,8 +148,10 @@ function Line({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  content: { padding: Spacing.lg, gap: Spacing.lg, paddingBottom: Spacing.xxl },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  screenContent: { flex: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.sm },
+  content: { paddingTop: Spacing.lg, paddingBottom: Spacing.xxl, gap: Spacing.lg },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: Spacing.md },
+  headerText: { flex: 1, gap: Spacing.xs },
   title: { flexShrink: 1 },
   hero: { padding: Spacing.lg, gap: Spacing.xs, alignItems: 'center' },
   card: { padding: Spacing.lg, gap: Spacing.sm },
