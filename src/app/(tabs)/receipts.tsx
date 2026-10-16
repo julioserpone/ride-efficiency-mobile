@@ -119,7 +119,8 @@ export default function ReceiptsScreen() {
   useFocusEffect(
     useCallback(() => {
       void receipts.load();
-    }, [receipts])
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
   );
 
   const saveReview = async () => {
